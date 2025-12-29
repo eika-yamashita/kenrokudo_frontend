@@ -1,34 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getIndividual } from '../api/IndividualService';
-import { IndividualEditor } from '../components/IndividualEditor';
-import type { Individual } from '../api/models/Individual';
+import { useParams } from 'react-router-dom';
+import { useIndividualEditor } from '../hooks/useIndividualEditor';
 
-export const IndividualEditorPage: React.FC = () => {
-  const { speciesCd, id } = useParams();
-  const navigate = useNavigate();
-  const [individual, setIndividual] = useState<Individual | null>(null);
-  const [error, setError] = useState<string | null>(null);
+export const IndividualEditorPage = () => {
+  const { species, id } = useParams<{
+    species: string;
+    id: string;
+  }>();
 
-useEffect(() => {
-  if (speciesCd && id) {
-    getIndividual(speciesCd, id)
-      .then(setIndividual)
-      .catch(e => setError(e.message));
-  }
-}, [speciesCd, id]);
+  const {
+    individual,
+    updateField,
+    save,
+    loading,
+    saving,
+    error,
+  } = useIndividualEditor({
+    species: species!,
+    individualId: id!,
+  });
 
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-  if (!individual) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (!individual) return <div>No data</div>;
 
   return (
     <div>
-      <button onClick={() => navigate(-1)}>一覧へ戻る</button>
-      <IndividualEditor
-        individual={individual}
-        onUpdated={() => navigate('/')}
-        onDeleted={() => navigate('/')}
+      <h2>個体編集</h2>
+
+      <input
+        value={individual.name}
+        onChange={(e) => updateField('name', e.target.value)}
       />
+
+      <button onClick={save} disabled={saving}>
+        保存
+      </button>
+
+      {error && <div style={{ color: 'red' }}>{error}</div>}
     </div>
   );
 };
