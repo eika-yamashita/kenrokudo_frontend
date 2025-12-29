@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getIndividual } from '../api/IndividualService';
-import { IndividualEditor } from './IndividualEditor';
+import { IndividualEditor } from '../components/IndividualEditor';
 import type { Individual } from '../api/models/Individual';
 
 export const IndividualEditorPage: React.FC = () => {
