@@ -2,6 +2,17 @@
   text-align: center;
 }
 
+.app-header {
+  background: #000;
+  color: #fff;
+  padding: 16px;
+  margin: 0;
+}
+
+.app-header h2 {
+  margin: 0;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useIndividualEditor } from '../hooks/useIndividualEditor';
 
 export const IndividualEditorPage = () => {
@@ -6,6 +6,7 @@ export const IndividualEditorPage = () => {
     species: string;
     id: string;
   }>();
+  const navigate = useNavigate();
 
   const {
     individual,
@@ -24,6 +25,7 @@ export const IndividualEditorPage = () => {
 
   return (
     <div>
+      <button onClick={() => navigate('/')}>個体情報一覧に戻る</button>
       <h2>個体編集</h2>
 
       <input
