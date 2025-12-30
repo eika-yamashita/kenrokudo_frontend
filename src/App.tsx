@@ -1,11 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { IndividualListPage } from './pages/IndividualListPage';
 import { IndividualEditorPage } from './pages/IndividualEditorPage';
+import './App.css';
 
 function App() {
   return (
     <Router>
-      <h2>絢禄堂</h2>
+      <header className="app-header">
+        <h2>絢禄堂</h2>
+      </header>
       <Routes>
         <Route path="/" element={<IndividualListPage />} />
         <Route path="/edit/:speciesCd/:id" element={<IndividualEditorPage />} />
