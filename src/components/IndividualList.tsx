@@ -10,6 +10,9 @@ export const IndividualList = ({ individuals }: Props) => {
   return (
     <div>
       <h2>個体情報一覧</h2>
+      <div style={{ marginBottom: 12 }}>
+        <Link to="/new">新規登録</Link>
+      </div>
       <table border={1} cellPadding={6} cellSpacing={0}>
         <thead>
           <tr>

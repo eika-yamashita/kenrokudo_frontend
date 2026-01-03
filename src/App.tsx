@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { IndividualListPage } from './pages/IndividualListPage';
 import { IndividualEditorPage } from './pages/IndividualEditorPage';
+import { IndividualCreatePage } from './pages/IndividualCreatePage';
 import './App.css';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
       </header>
       <Routes>
         <Route path="/" element={<IndividualListPage />} />
+        <Route path="/new" element={<IndividualCreatePage />} />
         <Route path="/edit/:species_cd/:id" element={<IndividualEditorPage />} />
       </Routes>
     </Router>
