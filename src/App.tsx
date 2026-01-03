@@ -11,7 +11,7 @@ function App() {
       </header>
       <Routes>
         <Route path="/" element={<IndividualListPage />} />
-        <Route path="/edit/:speciesCd/:id" element={<IndividualEditorPage />} />
+        <Route path="/edit/:species_cd/:id" element={<IndividualEditorPage />} />
       </Routes>
     </Router>
   );

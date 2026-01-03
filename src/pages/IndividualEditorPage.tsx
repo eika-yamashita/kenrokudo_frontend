@@ -2,8 +2,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useIndividualEditor } from '../hooks/useIndividualEditor';
 
 export const IndividualEditorPage = () => {
-  const { species, id } = useParams<{
-    species: string;
+  const { species_cd: speciesCd, id } = useParams<{
+    species_cd: string;
     id: string;
   }>();
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const IndividualEditorPage = () => {
     saving,
     error,
   } = useIndividualEditor({
-    species: species!,
+    species: speciesCd!,
     individualId: id!,
   });
 
@@ -29,8 +29,8 @@ export const IndividualEditorPage = () => {
       <h2>個体編集</h2>
 
       <input
-        value={individual.name}
-        onChange={(e) => updateField('name', e.target.value)}
+        value={individual.morph ?? ''}
+        onChange={(e) => updateField('morph', e.target.value)}
       />
 
       <button onClick={save} disabled={saving}>
