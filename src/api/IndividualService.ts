@@ -30,6 +30,18 @@ export async function updateIndividual(
   if (!res.ok) throw new Error('バックエンドとの疎通に失敗しました');
 }
 
+export async function createIndividual(individual: Individual): Promise<Individual> {
+  const res = await fetch(`${API_BASE}/individuals`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(individual),
+  });
+
+  if (!res.ok) throw new Error('バックエンドとの疎通に失敗しました');
+
+  return await res.json();
+}
+
 export async function deleteIndividual(
   speciesCd: string,
   id: string
