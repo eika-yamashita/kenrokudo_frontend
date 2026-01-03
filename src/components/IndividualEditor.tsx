@@ -13,12 +13,12 @@ export const IndividualEditor: React.FC<Props> = ({ individual, onUpdated, onDel
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value } as Individual);
   };
 
   const handleUpdate = async () => {
     try {
-      await updateIndividual(form.speciesCd, form.id, form);
+      await updateIndividual(form.species_cd, form.id, form);
       setError(null);
       if (onUpdated) onUpdated();
     } catch (e: any) {
@@ -28,7 +28,7 @@ export const IndividualEditor: React.FC<Props> = ({ individual, onUpdated, onDel
 
   const handleDelete = async () => {
     try {
-      await deleteIndividual(form.speciesCd, form.id);
+      await deleteIndividual(form.species_cd, form.id);
       setError(null);
       if (onDeleted) onDeleted();
     } catch (e: any) {
@@ -42,7 +42,7 @@ export const IndividualEditor: React.FC<Props> = ({ individual, onUpdated, onDel
       <div>
         <label>
           種別CD:
-          <input name="speciesCd" value={form.speciesCd} onChange={handleChange} disabled />
+          <input name="species_cd" value={form.species_cd} onChange={handleChange} disabled />
         </label>
       </div>
       <div>
@@ -53,14 +53,14 @@ export const IndividualEditor: React.FC<Props> = ({ individual, onUpdated, onDel
       </div>
       <div>
         <label>
-          名前:
-          <input name="name" value={form.name ?? ''} onChange={handleChange} />
+          モルフ:
+          <input name="morph" value={form.morph ?? ''} onChange={handleChange} />
         </label>
       </div>
       <div>
         <label>
-          性別:
-          <input name="gender" value={form.gender ?? ''} onChange={handleChange} />
+          雌雄区分:
+          <input name="gender_category" value={form.gender_category ?? ''} onChange={handleChange} />
         </label>
       </div>
       <button onClick={handleUpdate}>更新</button>
