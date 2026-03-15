@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { useIndividualCreator } from '../hooks/useIndividualCreator';
 
 export const IndividualCreatePage = () => {
@@ -8,18 +8,23 @@ export const IndividualCreatePage = () => {
   const handleSubmit = async () => {
     try {
       await save();
-      navigate('/');
+      navigate('/admin');
     } catch (e) {
       // error state is handled inside the hook
     }
   };
 
   return (
-    <div>
-      <button onClick={() => navigate('/')}>個体情報一覧に戻る</button>
-      <h2>個体新規登録</h2>
+    <div className="admin-page">
+      <div className="page-heading">
+        <button className="ghost-button" onClick={() => navigate('/admin')}>
+          一覧へ戻る
+        </button>
+        <h1>個体の新規登録</h1>
+        <p>管理画面から新しい個体情報を登録します。</p>
+      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 360 }}>
+      <div className="admin-form">
         <label>
           種コード
           <input
@@ -32,14 +37,14 @@ export const IndividualCreatePage = () => {
           <input value={individual.id} onChange={(e) => updateField('id', e.target.value)} />
         </label>
         <label>
-          オス親個体ID
+          オス親ID
           <input
             value={individual.male_parent_id ?? ''}
             onChange={(e) => updateField('male_parent_id', e.target.value)}
           />
         </label>
         <label>
-          メス親個体ID
+          メス親ID
           <input
             value={individual.female_parent_id ?? ''}
             onChange={(e) => updateField('female_parent_id', e.target.value)}
@@ -60,7 +65,7 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          雌雄区分 (M/F/U)
+          性別区分 (M/F/U)
           <input
             value={individual.gender_category ?? ''}
             onChange={(e) => updateField('gender_category', e.target.value)}
@@ -97,14 +102,14 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          仕入先
+          購入元
           <input
             value={individual.purchase_from ?? ''}
             onChange={(e) => updateField('purchase_from', e.target.value)}
           />
         </label>
         <label>
-          仕入価格
+          購入価格
           <input
             type="number"
             step="0.01"
@@ -118,7 +123,7 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          仕入日
+          購入日
           <input
             type="date"
             value={individual.purchase_date ?? ''}
@@ -140,7 +145,7 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          販売価格（税抜）
+          販売価格(税抜)
           <input
             type="number"
             step="0.01"
@@ -168,7 +173,7 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          販売価格（税込）
+          販売価格(税込)
           <input
             type="number"
             step="0.01"
@@ -198,21 +203,18 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          備考
-          <textarea
-            value={individual.note ?? ''}
-            onChange={(e) => updateField('note', e.target.value)}
-          />
+          メモ
+          <textarea value={individual.note ?? ''} onChange={(e) => updateField('note', e.target.value)} />
         </label>
         <label>
-          登録者
+          作成者
           <input
             value={individual.create_user}
             onChange={(e) => updateField('create_user', e.target.value)}
           />
         </label>
         <label>
-          登録日時
+          作成日時
           <input
             type="datetime-local"
             value={individual.create_at}
@@ -221,11 +223,13 @@ export const IndividualCreatePage = () => {
         </label>
       </div>
 
-      <button onClick={handleSubmit} disabled={saving} style={{ marginTop: 16 }}>
-        登録
-      </button>
+      <div className="form-actions">
+        <button className="primary-button" onClick={handleSubmit} disabled={saving}>
+          {saving ? '登録中...' : '登録する'}
+        </button>
+      </div>
 
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && <div className="status-message error-message">{error}</div>}
     </div>
   );
 };

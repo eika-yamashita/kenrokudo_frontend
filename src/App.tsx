@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+﻿import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { HomePage } from './pages/HomePage';
 import { IndividualListPage } from './pages/IndividualListPage';
 import { IndividualEditorPage } from './pages/IndividualEditorPage';
 import { IndividualCreatePage } from './pages/IndividualCreatePage';
@@ -7,14 +8,21 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <header className="app-header">
-        <h2>絢禄堂</h2>
-      </header>
-      <Routes>
-        <Route path="/" element={<IndividualListPage />} />
-        <Route path="/new" element={<IndividualCreatePage />} />
-        <Route path="/edit/:species_cd/:id" element={<IndividualEditorPage />} />
-      </Routes>
+      <div className="app-shell">
+        <header className="app-header">
+          <Link className="brand-link" to="/">
+            Breeding Base
+          </Link>
+        </header>
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/admin" element={<IndividualListPage />} />
+            <Route path="/admin/new" element={<IndividualCreatePage />} />
+            <Route path="/admin/edit/:species_cd/:id" element={<IndividualEditorPage />} />
+          </Routes>
+        </main>
+      </div>
     </Router>
   );
 }
