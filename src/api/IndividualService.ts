@@ -1,6 +1,6 @@
 import { Individual } from './models/Individual';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 export async function getIndividualList(): Promise<Individual[]> {
   const res = await fetch(`${API_BASE}/individuals`);
