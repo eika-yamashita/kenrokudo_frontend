@@ -1,10 +1,10 @@
 ﻿body {
   margin: 0;
-  font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  font-family: 'Manrope', 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f3f3f3;
-  color: #171717;
+  background: #ffffff;
+  color: #1f1710;
 }
 
 code {
@@ -25,6 +25,8 @@ img {
 
 input:focus,
 textarea:focus {
-  outline: 2px solid rgba(0, 0, 0, 0.08);
-  border-color: #777;
+  outline: 2px solid rgba(140, 100, 55, 0.16);
+  border-color: #a77743;
 }
+
+

@@ -11,7 +11,7 @@ function App() {
       <div className="app-shell">
         <header className="app-header">
           <Link className="brand-link" to="/">
-            Breeding Base
+            絢禄堂 -KENROKUDO-
           </Link>
         </header>
         <main className="app-main">
