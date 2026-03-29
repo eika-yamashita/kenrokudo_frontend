@@ -28,7 +28,7 @@ export const useIndividualCreator = () => {
     setError(null);
 
     try {
-      await createIndividual(individual);
+      return await createIndividual(individual);
     } catch (e: any) {
       setError(e.message);
       throw e;

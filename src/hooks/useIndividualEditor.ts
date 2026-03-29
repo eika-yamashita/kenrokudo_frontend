@@ -1,8 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import {
-  getIndividual,
-  updateIndividual,
-} from '../api/IndividualService';
+﻿import { useEffect, useState, useCallback } from 'react';
+import { getIndividual, updateIndividual } from '../api/IndividualService';
 import type { Individual } from '../api/models/Individual';
 
 type UseIndividualEditorArgs = {
@@ -10,18 +7,12 @@ type UseIndividualEditorArgs = {
   individualId: string;
 };
 
-export const useIndividualEditor = ({
-  species,
-  individualId,
-}: UseIndividualEditorArgs) => {
+export const useIndividualEditor = ({ species, individualId }: UseIndividualEditorArgs) => {
   const [individual, setIndividual] = useState<Individual | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /* -------------------------
-   * 初期取得
-   * ------------------------- */
   useEffect(() => {
     setLoading(true);
     getIndividual(species, individualId)
@@ -30,21 +21,10 @@ export const useIndividualEditor = ({
       .finally(() => setLoading(false));
   }, [species, individualId]);
 
-  /* -------------------------
-   * フィールド更新
-   * ------------------------- */
-  const updateField = useCallback(
-    <K extends keyof Individual>(key: K, value: Individual[K]) => {
-      setIndividual((prev) =>
-        prev ? { ...prev, [key]: value } : prev
-      );
-    },
-    []
-  );
+  const updateField = useCallback(<K extends keyof Individual>(key: K, value: Individual[K]) => {
+    setIndividual((prev) => (prev ? { ...prev, [key]: value } : prev));
+  }, []);
 
-  /* -------------------------
-   * 保存
-   * ------------------------- */
   const save = async () => {
     if (!individual) return;
 
@@ -52,11 +32,7 @@ export const useIndividualEditor = ({
     setError(null);
 
     try {
-      await updateIndividual(
-        species,
-        individualId,
-        individual
-      );
+      await updateIndividual(species, individualId, individual);
     } catch (e: any) {
       setError(e.message);
       throw e;
