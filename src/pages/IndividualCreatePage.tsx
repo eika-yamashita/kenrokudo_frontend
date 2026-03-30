@@ -134,19 +134,19 @@ export const IndividualCreatePage = () => {
           <input value={individual.breeder ?? ''} onChange={(e) => updateField('breeder', e.target.value)} />
         </label>
         <label>
-          クラッチ日
-          <input
-            type="date"
-            value={individual.clutch_date ?? ''}
-            onChange={(e) => updateField('clutch_date', e.target.value)}
-          />
-        </label>
-        <label>
           ハッチ日
           <input
             type="date"
             value={individual.hatch_date ?? ''}
             onChange={(e) => updateField('hatch_date', e.target.value)}
+          />
+        </label>
+        <label>
+          クラッチ日
+          <input
+            type="date"
+            value={individual.clutch_date ?? ''}
+            onChange={(e) => updateField('clutch_date', e.target.value)}
           />
         </label>
         <label>
