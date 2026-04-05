@@ -1,18 +1,20 @@
 ﻿import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getIndividualImages } from '../api/IndividualImageService';
+import { getSpeciesList } from '../api/SpeciesService';
 import type { IndividualImage } from '../api/models/IndividualImage';
 import { useIndividualEditor } from '../hooks/useIndividualEditor';
 import { formatDateTimeYmdHm, formatDateYmd } from '../utils/dateFormat';
+import { formatGenderCategory } from '../utils/genderCategory';
 
 const fieldRows: Array<{ label: string; valueKey: keyof NonNullable<ReturnType<typeof useIndividualEditor>['individual']> }> = [
-  { label: '種コード', valueKey: 'species_id' },
+  { label: '種ID', valueKey: 'species_id' },
   { label: '個体ID', valueKey: 'id' },
   { label: 'オス親ID', valueKey: 'male_parent_id' },
   { label: 'メス親ID', valueKey: 'female_parent_id' },
   { label: 'モルフ', valueKey: 'morph' },
   { label: '血統', valueKey: 'bloodline' },
-  { label: '性別区分', valueKey: 'gender_category' },
+  { label: '雌雄区分', valueKey: 'gender_category' },
   { label: '繁殖区分', valueKey: 'breeding_category' },
   { label: 'ブリーダー名', valueKey: 'breeder' },
   { label: 'ハッチ日', valueKey: 'hatch_date' },
@@ -42,10 +44,11 @@ export const IndividualDetailPage = () => {
   const [images, setImages] = useState<IndividualImage[]>([]);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [speciesDisplayName, setSpeciesDisplayName] = useState<string>('');
 
   const breedingCategoryLabelMap: Record<string, string> = {
-    '0': '0: 自家繁殖',
-    '1': '1: 購入個体',
+    '0': '自家繁殖',
+    '1': '購入個体',
   };
 
   const dateKeys = new Set([
@@ -67,6 +70,14 @@ export const IndividualDetailPage = () => {
       return breedingCategoryLabelMap[value] ?? value;
     }
 
+    if (key === 'species_id') {
+      return speciesDisplayName || value;
+    }
+
+    if (key === 'gender_category') {
+      return formatGenderCategory(value);
+    }
+
     if (key === 'create_at' || key === 'update_at') {
       return formatDateTimeYmdHm(value);
     }
@@ -77,6 +88,21 @@ export const IndividualDetailPage = () => {
 
     return value;
   };
+
+  useEffect(() => {
+    const loadSpecies = async () => {
+      if (!speciesId) return;
+      try {
+        const species = await getSpeciesList();
+        const selected = species.find((item) => item.species_id === speciesId);
+        setSpeciesDisplayName(selected?.common_name || selected?.japanese_name || speciesId);
+      } catch {
+        setSpeciesDisplayName(speciesId);
+      }
+    };
+
+    loadSpecies();
+  }, [speciesId]);
 
   useEffect(() => {
     const loadImages = async () => {
@@ -102,21 +128,18 @@ export const IndividualDetailPage = () => {
   return (
     <div className="admin-page">
       <div className="page-heading">
-        <button className="ghost-button" onClick={() => navigate('/admin')}>
-          一覧へ戻る
-        </button>
-        <h1>個体詳細</h1>
-        <p>
-          種コード: <strong>{individual.species_id}</strong> / 個体ID: <strong>{individual.id}</strong>
-        </p>
+
+        
       </div>
 
       <div className="form-actions">
         <button
           className="primary-button"
-          onClick={() => navigate(`/admin/edit/${individual.species_id}/${individual.id}`)}
-        >
+          onClick={() => navigate(`/admin/individuals/edit/${individual.species_id}/${individual.id}`)}>
           編集する
+        </button>
+        <button className="ghost-button" onClick={() => navigate('/admin/individuals')}>
+          一覧へ戻る
         </button>
       </div>
 
@@ -130,7 +153,6 @@ export const IndividualDetailPage = () => {
               <div key={img.image_id} className="image-card">
                 <img src={img.public_url} alt={img.file_name ?? String(img.image_id)} />
                 <div className="image-meta">
-                  <div>{img.file_name ?? String(img.image_id)}</div>
                   <div>{img.is_primary ? 'メイン画像' : 'サブ画像'}</div>
                 </div>
               </div>

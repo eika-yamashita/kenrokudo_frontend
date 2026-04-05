@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getIndividualImages } from '../api/IndividualImageService';
 import { getSpeciesList } from '../api/SpeciesService';
 import type { Individual } from '../api/models/Individual';
+import { formatGenderCategory } from '../utils/genderCategory';
 
 type Props = {
   individuals: Individual[];
@@ -76,8 +77,11 @@ export const IndividualList = ({ individuals }: Props) => {
         <h1>個体一覧</h1>
       </div>
       <div className="toolbar">
-        <button className="primary-button" onClick={() => navigate('/admin/new')}>
+        <button className="primary-button" onClick={() => navigate('/admin/individuals/new')}>
           新規登録
+        </button>
+        <button className="ghost-button" onClick={() => navigate('/admin')}>
+          管理メニューへ戻る
         </button>
       </div>
       <div className="table-wrap">
@@ -92,11 +96,11 @@ export const IndividualList = ({ individuals }: Props) => {
                 <tr
                   key={imageKey}
                   className="row-clickable"
-                  onClick={() => navigate(`/admin/detail/${i.species_id}/${i.id}`)}
+                  onClick={() => navigate(`/admin/individuals/detail/${i.species_id}/${i.id}`)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      navigate(`/admin/detail/${i.species_id}/${i.id}`);
+                      navigate(`/admin/individuals/detail/${i.species_id}/${i.id}`);
                     }
                   }}
                   role="button"
@@ -109,10 +113,12 @@ export const IndividualList = ({ individuals }: Props) => {
                       <div className="individual-thumb placeholder-thumb">No Image</div>
                     )}
                   </td>
-                  <td data-label="種名">{speciesNames[i.species_id] ?? i.species_id}</td>
+                  <td data-label="種名" className="species-cell">
+                    {speciesNames[i.species_id] ?? i.species_id}
+                  </td>
                   <td data-label="ID">{i.id}</td>
                   <td data-label="モルフ">{i.morph ?? '-'}</td>
-                  <td data-label="性別">{i.gender_category ?? '-'}</td>
+                  <td data-label="雌雄区分">{formatGenderCategory(i.gender_category)}</td>
                 </tr>
               );
             })}

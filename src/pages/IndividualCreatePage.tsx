@@ -5,6 +5,7 @@ import { getSpeciesList } from '../api/SpeciesService';
 import type { Species } from '../api/models/Species';
 import { useIndividualCreator } from '../hooks/useIndividualCreator';
 import { toDateInputValue } from '../utils/dateFormat';
+import { genderCategoryOptions } from '../utils/genderCategory';
 
 export const IndividualCreatePage = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ export const IndividualCreatePage = () => {
           await uploadIndividualImage(created.species_id, created.id, imageFiles[i], i === primaryImageIndex);
         }
       }
-      navigate('/admin');
+      navigate('/admin/individuals');
     } catch (e: any) {
       setUploadError(e.message ?? '画像のアップロードに失敗しました');
     }
@@ -86,7 +87,7 @@ export const IndividualCreatePage = () => {
   return (
     <div className="admin-page">
       <div className="page-heading">
-        <button className="ghost-button" onClick={() => navigate('/admin')}>
+        <button className="ghost-button" onClick={() => navigate('/admin/individuals')}>
           一覧へ戻る
         </button>
         <h1>新規登録</h1>
@@ -195,11 +196,18 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          性別区分 (M/F/U)
-          <input
+          雌雄区分
+          <select
             value={individual.gender_category ?? ''}
             onChange={(e) => updateField('gender_category', e.target.value)}
-          />
+          >
+            <option value="">選択してください</option>
+            {genderCategoryOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           ブリーダー名

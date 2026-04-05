@@ -7,9 +7,11 @@ import {
   setPrimaryIndividualImage,
   uploadIndividualImage,
 } from '../api/IndividualImageService';
+import { getSpeciesList } from '../api/SpeciesService';
 import type { IndividualImage } from '../api/models/IndividualImage';
 import { useIndividualEditor } from '../hooks/useIndividualEditor';
 import { toDateInputValue } from '../utils/dateFormat';
+import { genderCategoryOptions } from '../utils/genderCategory';
 
 export const IndividualEditorPage = () => {
   const { species_id: speciesId, id } = useParams<{
@@ -28,6 +30,7 @@ export const IndividualEditorPage = () => {
   const [imageError, setImageError] = useState<string | null>(null);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [savingAll, setSavingAll] = useState(false);
+  const [speciesDisplayName, setSpeciesDisplayName] = useState<string>('');
 
   const breedingCategoryOptions = [
     { value: '0', label: '0: 自家繁殖' },
@@ -51,6 +54,21 @@ export const IndividualEditorPage = () => {
   useEffect(() => {
     loadImages();
   }, [speciesId, id]);
+
+  useEffect(() => {
+    const loadSpecies = async () => {
+      if (!speciesId) return;
+      try {
+        const species = await getSpeciesList();
+        const selected = species.find((item) => item.species_id === speciesId);
+        setSpeciesDisplayName(selected?.common_name || selected?.japanese_name || speciesId);
+      } catch {
+        setSpeciesDisplayName(speciesId);
+      }
+    };
+
+    loadSpecies();
+  }, [speciesId]);
 
   if (loading) return <div className="status-message">読み込み中...</div>;
   if (!individual) return <div className="status-message">データが見つかりません</div>;
@@ -89,21 +107,20 @@ export const IndividualEditorPage = () => {
       <div className="page-heading">
         <button
           className="ghost-button"
-          onClick={() => navigate(`/admin/detail/${individual.species_id}/${individual.id}`)}
+          onClick={() => navigate(`/admin/individuals/detail/${individual.species_id}/${individual.id}`)}
         >
           詳細へ戻る
         </button>
         <h1>個体情報の編集</h1>
         <p>
-          種コード: <strong>{individual.species_id}</strong> / 個体ID: <strong>{individual.id}</strong>
+          種ID: <strong>{speciesDisplayName || individual.species_id}</strong> / 個体ID: <strong>{individual.id}</strong>
         </p>
       </div>
 
       <div className="image-upload-panel">
-        <h2>画像管理</h2>
+        <h2>画像</h2>
 
         <label>
-          画像追加（複数選択可）
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -127,7 +144,6 @@ export const IndividualEditorPage = () => {
               <div key={img.image_id} className="image-card">
                 <img src={img.public_url} alt={img.file_name ?? String(img.image_id)} />
                 <div className="image-meta">
-                  <div>{img.file_name ?? String(img.image_id)}</div>
                   <div>{img.is_primary ? 'メイン画像' : 'サブ画像'}</div>
                 </div>
                 <div className="image-actions">
@@ -147,7 +163,7 @@ export const IndividualEditorPage = () => {
                     </button>
                   )}
                   <label className="ghost-button file-button">
-                    差し替え
+                    差替
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
@@ -187,8 +203,8 @@ export const IndividualEditorPage = () => {
         <h2>個体情報</h2>
         <div className="admin-form">
           <label>
-            種コード
-            <input value={individual.species_id} disabled />
+            種ID
+            <input value={speciesDisplayName || individual.species_id} disabled />
           </label>
           <label>
             個体ID
@@ -220,11 +236,18 @@ export const IndividualEditorPage = () => {
             />
           </label>
           <label>
-            性別区分 (M/F/U)
-            <input
+            雌雄区分
+            <select
               value={individual.gender_category ?? ''}
               onChange={(e) => updateField('gender_category', e.target.value)}
-            />
+            >
+              <option value="">選択してください</option>
+              {genderCategoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             繁殖区分

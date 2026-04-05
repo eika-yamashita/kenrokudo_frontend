@@ -249,6 +249,24 @@
   margin-top: 24px;
 }
 
+.inline-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.admin-menu-button {
+  min-height: 58px;
+  font-size: 1rem;
+}
+
 .primary-button,
 .ghost-button {
   appearance: none;
@@ -388,6 +406,11 @@
   text-decoration: none;
 }
 
+.individual-table .species-cell {
+  min-width: 96px;
+  white-space: nowrap;
+}
+
 .individual-thumb {
   width: 72px;
   height: 72px;
@@ -454,6 +477,7 @@
 
 .image-upload-panel {
   margin-top: 24px;
+  margin-bottom: 24px;
   border: 1px solid #e2e2e2;
   padding: 16px;
   background: #ffffff;
@@ -579,6 +603,10 @@
 
   .home-hero-banner {
     min-height: 450px;
+  }
+
+  .hero-banner-image {
+    object-position: 78% 30%;
   }
 
   .hero-banner-content {
