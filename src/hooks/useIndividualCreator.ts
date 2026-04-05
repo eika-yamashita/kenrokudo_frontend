@@ -3,9 +3,9 @@ import { createIndividual } from '../api/IndividualService';
 import type { Individual } from '../api/models/Individual';
 
 const initialIndividual: Individual = {
-  species_cd: '',
+  species_id: '',
   id: '',
-  create_user: '',
+  create_user: 'system',
   create_at: new Date().toISOString().slice(0, 16),
 };
 

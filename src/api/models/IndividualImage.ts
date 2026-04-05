@@ -1,6 +1,6 @@
 export interface IndividualImage {
   image_id: number;
-  species_cd: string;
+  species_id: string;
   individual_id: string;
   storage_path: string;
   public_url: string;

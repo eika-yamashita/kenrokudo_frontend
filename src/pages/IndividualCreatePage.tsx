@@ -4,15 +4,21 @@ import { uploadIndividualImage } from '../api/IndividualImageService';
 import { getSpeciesList } from '../api/SpeciesService';
 import type { Species } from '../api/models/Species';
 import { useIndividualCreator } from '../hooks/useIndividualCreator';
+import { toDateInputValue } from '../utils/dateFormat';
 
 export const IndividualCreatePage = () => {
   const navigate = useNavigate();
   const { individual, updateField, save, saving, error } = useIndividualCreator();
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [speciesList, setSpeciesList] = useState<Species[]>([]);
   const [speciesLoading, setSpeciesLoading] = useState(true);
+  const breedingCategoryOptions = [
+    { value: '0', label: '0: 自家繁殖' },
+    { value: '1', label: '1: 購入個体' },
+  ];
 
   useEffect(() => {
     let cancelled = false;
@@ -22,8 +28,8 @@ export const IndividualCreatePage = () => {
         const list = await getSpeciesList();
         if (!cancelled) {
           setSpeciesList(list);
-          if (!individual.species_cd && list.length > 0) {
-            updateField('species_cd', list[0].species_id);
+          if (!individual.species_id && list.length > 0) {
+            updateField('species_id', list[0].species_id);
           }
         }
       } catch {
@@ -38,11 +44,28 @@ export const IndividualCreatePage = () => {
     return () => {
       cancelled = true;
     };
-  }, [individual.species_cd, updateField]);
+  }, [individual.species_id, updateField]);
+
+  useEffect(() => {
+    const previewUrls = imageFiles.map((file) => URL.createObjectURL(file));
+    setImagePreviews(previewUrls);
+
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imageFiles]);
 
   const handleSubmit = async () => {
-    if (!individual.species_cd) {
+    if (!individual.species_id) {
       setUploadError('種を選択してください');
+      return;
+    }
+    if (!individual.breeding_category) {
+      setUploadError('繁殖区分を選択してください');
+      return;
+    }
+    if (individual.breeding_category && !individual.hatch_date) {
+      setUploadError('繁殖区分を選択した場合はハッチ日を入力してください');
       return;
     }
 
@@ -51,7 +74,7 @@ export const IndividualCreatePage = () => {
       const created = await save();
       if (created && imageFiles.length > 0) {
         for (let i = 0; i < imageFiles.length; i += 1) {
-          await uploadIndividualImage(created.species_cd, created.id, imageFiles[i], i === primaryImageIndex);
+          await uploadIndividualImage(created.species_id, created.id, imageFiles[i], i === primaryImageIndex);
         }
       }
       navigate('/admin');
@@ -66,22 +89,78 @@ export const IndividualCreatePage = () => {
         <button className="ghost-button" onClick={() => navigate('/admin')}>
           一覧へ戻る
         </button>
-        <h1>個体の新規登録</h1>
-        <p>管理画面から新しい個体情報を登録します。</p>
+        <h1>新規登録</h1>
+      </div>
+
+      <div className="image-upload-panel">
+        <label>
+          画像ファイル
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              setImageFiles(files);
+              setPrimaryImageIndex(0);
+            }}
+          />
+        </label>
+
+        {imageFiles.length > 0 && (
+          <div className="selected-images">
+            {imageFiles.map((file, index) => {
+              const previewUrl = imagePreviews[index];
+              return (
+                <label key={`${file.name}-${index}`} className="image-row">
+                  <input
+                    type="radio"
+                    name="primaryImage"
+                    checked={primaryImageIndex === index}
+                    onChange={() => setPrimaryImageIndex(index)}
+                  />
+                  {previewUrl && (
+                    <img
+                      src={previewUrl}
+                      alt={file.name}
+                      style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, marginRight: 8 }}
+                    />
+                  )}
+                  <span>{file.name}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="admin-form">
         <label>
           種名
           <select
-            value={individual.species_cd}
-            onChange={(e) => updateField('species_cd', e.target.value)}
+            value={individual.species_id}
+            onChange={(e) => updateField('species_id', e.target.value)}
             disabled={speciesLoading || speciesList.length === 0}
           >
             {speciesList.length === 0 && <option value="">種マスタ未登録</option>}
             {speciesList.map((species) => (
               <option key={species.species_id} value={species.species_id}>
-                {species.common_name || species.japanese_name} ({species.species_id})
+                {species.common_name || species.japanese_name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          繁殖区分
+          <select
+            value={individual.breeding_category ?? ''}
+            onChange={(e) => updateField('breeding_category', e.target.value)}
+            required
+          >
+            <option value="">選択してください</option>
+            {breedingCategoryOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -123,13 +202,6 @@ export const IndividualCreatePage = () => {
           />
         </label>
         <label>
-          繁殖区分 (A/B)
-          <input
-            value={individual.breeding_category ?? ''}
-            onChange={(e) => updateField('breeding_category', e.target.value)}
-          />
-        </label>
-        <label>
           ブリーダー名
           <input value={individual.breeder ?? ''} onChange={(e) => updateField('breeder', e.target.value)} />
         </label>
@@ -137,15 +209,16 @@ export const IndividualCreatePage = () => {
           ハッチ日
           <input
             type="date"
-            value={individual.hatch_date ?? ''}
+            value={toDateInputValue(individual.hatch_date)}
             onChange={(e) => updateField('hatch_date', e.target.value)}
+            required={Boolean(individual.breeding_category)}
           />
         </label>
         <label>
           クラッチ日
           <input
             type="date"
-            value={individual.clutch_date ?? ''}
+            value={toDateInputValue(individual.clutch_date)}
             onChange={(e) => updateField('clutch_date', e.target.value)}
           />
         </label>
@@ -171,7 +244,7 @@ export const IndividualCreatePage = () => {
           購入日
           <input
             type="date"
-            value={individual.purchase_date ?? ''}
+            value={toDateInputValue(individual.purchase_date)}
             onChange={(e) => updateField('purchase_date', e.target.value)}
           />
         </label>
@@ -223,7 +296,7 @@ export const IndividualCreatePage = () => {
           販売日
           <input
             type="date"
-            value={individual.sales_date ?? ''}
+            value={toDateInputValue(individual.sales_date)}
             onChange={(e) => updateField('sales_date', e.target.value)}
           />
         </label>
@@ -231,7 +304,7 @@ export const IndividualCreatePage = () => {
           死亡日
           <input
             type="date"
-            value={individual.death_date ?? ''}
+            value={toDateInputValue(individual.death_date)}
             onChange={(e) => updateField('death_date', e.target.value)}
           />
         </label>
@@ -239,51 +312,6 @@ export const IndividualCreatePage = () => {
           メモ
           <textarea value={individual.note ?? ''} onChange={(e) => updateField('note', e.target.value)} />
         </label>
-        <label>
-          作成者
-          <input value={individual.create_user} onChange={(e) => updateField('create_user', e.target.value)} />
-        </label>
-        <label>
-          作成日時
-          <input
-            type="datetime-local"
-            value={individual.create_at}
-            onChange={(e) => updateField('create_at', e.target.value)}
-          />
-        </label>
-      </div>
-
-      <div className="image-upload-panel">
-        <h2>画像</h2>
-        <label>
-          画像ファイル（複数選択可）
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            onChange={(e) => {
-              const files = Array.from(e.target.files ?? []);
-              setImageFiles(files);
-              setPrimaryImageIndex(0);
-            }}
-          />
-        </label>
-
-        {imageFiles.length > 0 && (
-          <div className="selected-images">
-            {imageFiles.map((file, index) => (
-              <label key={`${file.name}-${index}`} className="image-row">
-                <input
-                  type="radio"
-                  name="primaryImage"
-                  checked={primaryImageIndex === index}
-                  onChange={() => setPrimaryImageIndex(index)}
-                />
-                <span>{file.name}</span>
-              </label>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="form-actions">

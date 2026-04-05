@@ -9,16 +9,17 @@ import {
 } from '../api/IndividualImageService';
 import type { IndividualImage } from '../api/models/IndividualImage';
 import { useIndividualEditor } from '../hooks/useIndividualEditor';
+import { toDateInputValue } from '../utils/dateFormat';
 
 export const IndividualEditorPage = () => {
-  const { species_cd: speciesCd, id } = useParams<{
-    species_cd: string;
+  const { species_id: speciesId, id } = useParams<{
+    species_id: string;
     id: string;
   }>();
   const navigate = useNavigate();
 
   const { individual, updateField, save, loading, saving, error } = useIndividualEditor({
-    species: speciesCd!,
+    species: speciesId!,
     individualId: id!,
   });
 
@@ -28,12 +29,17 @@ export const IndividualEditorPage = () => {
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [savingAll, setSavingAll] = useState(false);
 
+  const breedingCategoryOptions = [
+    { value: '0', label: '0: 自家繁殖' },
+    { value: '1', label: '1: 購入個体' },
+  ];
+
   const loadImages = async () => {
-    if (!speciesCd || !id) return;
+    if (!speciesId || !id) return;
     setImageLoading(true);
     setImageError(null);
     try {
-      const list = await getIndividualImages(speciesCd, id);
+      const list = await getIndividualImages(speciesId, id);
       setImages(list);
     } catch (e: any) {
       setImageError(e.message ?? '画像の取得に失敗しました');
@@ -44,12 +50,21 @@ export const IndividualEditorPage = () => {
 
   useEffect(() => {
     loadImages();
-  }, [speciesCd, id]);
+  }, [speciesId, id]);
 
   if (loading) return <div className="status-message">読み込み中...</div>;
   if (!individual) return <div className="status-message">データが見つかりません</div>;
 
   const handleSaveAll = async () => {
+    if (!individual.breeding_category) {
+      setImageError('繁殖区分を選択してください');
+      return;
+    }
+    if (individual.breeding_category && !individual.hatch_date) {
+      setImageError('繁殖区分を選択した場合はハッチ日を入力してください');
+      return;
+    }
+
     setSavingAll(true);
     setImageError(null);
     try {
@@ -57,7 +72,7 @@ export const IndividualEditorPage = () => {
 
       if (newFiles.length > 0) {
         for (let i = 0; i < newFiles.length; i += 1) {
-          await uploadIndividualImage(individual.species_cd, individual.id, newFiles[i]);
+          await uploadIndividualImage(individual.species_id, individual.id, newFiles[i]);
         }
         setNewFiles([]);
         await loadImages();
@@ -74,13 +89,13 @@ export const IndividualEditorPage = () => {
       <div className="page-heading">
         <button
           className="ghost-button"
-          onClick={() => navigate(`/admin/detail/${individual.species_cd}/${individual.id}`)}
+          onClick={() => navigate(`/admin/detail/${individual.species_id}/${individual.id}`)}
         >
           詳細へ戻る
         </button>
         <h1>個体情報の編集</h1>
         <p>
-          種コード: <strong>{individual.species_cd}</strong> / 個体ID: <strong>{individual.id}</strong>
+          種コード: <strong>{individual.species_id}</strong> / 個体ID: <strong>{individual.id}</strong>
         </p>
       </div>
 
@@ -121,7 +136,7 @@ export const IndividualEditorPage = () => {
                       className="ghost-button"
                       onClick={async () => {
                         try {
-                          await setPrimaryIndividualImage(individual.species_cd, individual.id, img.image_id);
+                          await setPrimaryIndividualImage(individual.species_id, individual.id, img.image_id);
                           await loadImages();
                         } catch (e: any) {
                           setImageError(e.message ?? 'メイン画像の設定に失敗しました');
@@ -140,7 +155,7 @@ export const IndividualEditorPage = () => {
                         const file = e.target.files?.[0];
                         if (!file) return;
                         try {
-                          await replaceIndividualImage(individual.species_cd, individual.id, img.image_id, file);
+                          await replaceIndividualImage(individual.species_id, individual.id, img.image_id, file);
                           await loadImages();
                         } catch (err: any) {
                           setImageError(err.message ?? '画像の差し替えに失敗しました');
@@ -152,7 +167,7 @@ export const IndividualEditorPage = () => {
                     className="ghost-button"
                     onClick={async () => {
                       try {
-                        await deleteIndividualImage(individual.species_cd, individual.id, img.image_id);
+                        await deleteIndividualImage(individual.species_id, individual.id, img.image_id);
                         await loadImages();
                       } catch (e: any) {
                         setImageError(e.message ?? '画像の削除に失敗しました');
@@ -173,7 +188,7 @@ export const IndividualEditorPage = () => {
         <div className="admin-form">
           <label>
             種コード
-            <input value={individual.species_cd} disabled />
+            <input value={individual.species_id} disabled />
           </label>
           <label>
             個体ID
@@ -212,11 +227,19 @@ export const IndividualEditorPage = () => {
             />
           </label>
           <label>
-            繁殖区分 (A/B)
-            <input
+            繁殖区分
+            <select
               value={individual.breeding_category ?? ''}
               onChange={(e) => updateField('breeding_category', e.target.value)}
-            />
+              required
+            >
+              <option value="">選択してください</option>
+              {breedingCategoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             ブリーダー名
@@ -226,7 +249,7 @@ export const IndividualEditorPage = () => {
             クラッチ日
             <input
               type="date"
-              value={individual.clutch_date ?? ''}
+              value={toDateInputValue(individual.clutch_date)}
               onChange={(e) => updateField('clutch_date', e.target.value)}
             />
           </label>
@@ -234,8 +257,9 @@ export const IndividualEditorPage = () => {
             ハッチ日
             <input
               type="date"
-              value={individual.hatch_date ?? ''}
+              value={toDateInputValue(individual.hatch_date)}
               onChange={(e) => updateField('hatch_date', e.target.value)}
+              required={Boolean(individual.breeding_category)}
             />
           </label>
           <label>
@@ -260,7 +284,7 @@ export const IndividualEditorPage = () => {
             購入日
             <input
               type="date"
-              value={individual.purchase_date ?? ''}
+              value={toDateInputValue(individual.purchase_date)}
               onChange={(e) => updateField('purchase_date', e.target.value)}
             />
           </label>
@@ -312,7 +336,7 @@ export const IndividualEditorPage = () => {
             販売日
             <input
               type="date"
-              value={individual.sales_date ?? ''}
+              value={toDateInputValue(individual.sales_date)}
               onChange={(e) => updateField('sales_date', e.target.value)}
             />
           </label>
@@ -320,20 +344,13 @@ export const IndividualEditorPage = () => {
             死亡日
             <input
               type="date"
-              value={individual.death_date ?? ''}
+              value={toDateInputValue(individual.death_date)}
               onChange={(e) => updateField('death_date', e.target.value)}
             />
           </label>
           <label>
             メモ
             <textarea value={individual.note ?? ''} onChange={(e) => updateField('note', e.target.value)} />
-          </label>
-          <label>
-            更新者
-            <input
-              value={individual.update_user ?? ''}
-              onChange={(e) => updateField('update_user', e.target.value)}
-            />
           </label>
         </div>
       </div>

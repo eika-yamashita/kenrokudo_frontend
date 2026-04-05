@@ -18,7 +18,7 @@ export const IndividualEditor: React.FC<Props> = ({ individual, onUpdated, onDel
 
   const handleUpdate = async () => {
     try {
-      await updateIndividual(form.species_cd, form.id, form);
+      await updateIndividual(form.species_id, form.id, form);
       setError(null);
       if (onUpdated) onUpdated();
     } catch (e: any) {
@@ -28,7 +28,7 @@ export const IndividualEditor: React.FC<Props> = ({ individual, onUpdated, onDel
 
   const handleDelete = async () => {
     try {
-      await deleteIndividual(form.species_cd, form.id);
+      await deleteIndividual(form.species_id, form.id);
       setError(null);
       if (onDeleted) onDeleted();
     } catch (e: any) {
@@ -42,7 +42,7 @@ export const IndividualEditor: React.FC<Props> = ({ individual, onUpdated, onDel
       <div>
         <label>
           種別CD:
-          <input name="species_cd" value={form.species_cd} onChange={handleChange} disabled />
+          <input name="species_id" value={form.species_id} onChange={handleChange} disabled />
         </label>
       </div>
       <div>

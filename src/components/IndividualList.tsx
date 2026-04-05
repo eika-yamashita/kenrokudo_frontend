@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getIndividualImages } from '../api/IndividualImageService';
 import { getSpeciesList } from '../api/SpeciesService';
@@ -19,10 +19,10 @@ export const IndividualList = ({ individuals }: Props) => {
     const loadImages = async () => {
       const entries = await Promise.all(
         individuals.map(async (individual) => {
-          const key = `${individual.species_cd}-${individual.id}`;
+          const key = `${individual.species_id}-${individual.id}`;
 
           try {
-            const images = await getIndividualImages(individual.species_cd, individual.id);
+            const images = await getIndividualImages(individual.species_id, individual.id);
             const primaryImage = images.find((image) => image.is_primary) ?? images[0];
             return [key, primaryImage?.public_url ?? ''] as const;
           } catch {
@@ -73,8 +73,7 @@ export const IndividualList = ({ individuals }: Props) => {
   return (
     <div className="admin-page">
       <div className="page-heading">
-        <h1>管理画面トップ</h1>
-        <p>登録済みの個体情報を一覧し、必要に応じて追加や編集を行います。</p>
+        <h1>個体一覧</h1>
       </div>
       <div className="toolbar">
         <button className="primary-button" onClick={() => navigate('/admin/new')}>
@@ -83,30 +82,21 @@ export const IndividualList = ({ individuals }: Props) => {
       </div>
       <div className="table-wrap">
         <table className="individual-table">
-          <thead>
-            <tr>
-              <th>画像</th>
-              <th>種名</th>
-              <th>ID</th>
-              <th>モルフ</th>
-              <th>性別</th>
-              <th>繁殖区分</th>
-            </tr>
-          </thead>
+
           <tbody>
             {individuals.map((i) => {
-              const imageKey = `${i.species_cd}-${i.id}`;
+              const imageKey = `${i.species_id}-${i.id}`;
               const imageUrl = imageUrls[imageKey];
 
               return (
                 <tr
                   key={imageKey}
                   className="row-clickable"
-                  onClick={() => navigate(`/admin/detail/${i.species_cd}/${i.id}`)}
+                  onClick={() => navigate(`/admin/detail/${i.species_id}/${i.id}`)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      navigate(`/admin/detail/${i.species_cd}/${i.id}`);
+                      navigate(`/admin/detail/${i.species_id}/${i.id}`);
                     }
                   }}
                   role="button"
@@ -114,16 +104,15 @@ export const IndividualList = ({ individuals }: Props) => {
                 >
                   <td data-label="画像">
                     {imageUrl ? (
-                      <img className="individual-thumb" src={imageUrl} alt={`${i.species_cd}-${i.id}`} />
+                      <img className="individual-thumb" src={imageUrl} alt={`${i.species_id}-${i.id}`} />
                     ) : (
                       <div className="individual-thumb placeholder-thumb">No Image</div>
                     )}
                   </td>
-                  <td data-label="種名">{speciesNames[i.species_cd] ?? i.species_cd}</td>
+                  <td data-label="種名">{speciesNames[i.species_id] ?? i.species_id}</td>
                   <td data-label="ID">{i.id}</td>
                   <td data-label="モルフ">{i.morph ?? '-'}</td>
                   <td data-label="性別">{i.gender_category ?? '-'}</td>
-                  <td data-label="繁殖区分">{i.breeding_category ?? '-'}</td>
                 </tr>
               );
             })}

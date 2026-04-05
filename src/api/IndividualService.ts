@@ -1,4 +1,4 @@
-﻿import { API_BASE } from './apiBase';
+import { API_BASE } from './apiBase';
 import { Individual } from './models/Individual';
 
 const toNullableString = (value: string | undefined | null) =>
@@ -39,15 +39,15 @@ export async function getIndividualList(): Promise<Individual[]> {
   return await res.json();
 }
 
-export async function getIndividual(speciesCd: string, id: string): Promise<Individual> {
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}`);
+export async function getIndividual(speciesId: string, id: string): Promise<Individual> {
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}`);
   if (!res.ok) throw new Error('個体情報の取得に失敗しました');
   return await res.json();
 }
 
-export async function updateIndividual(speciesCd: string, id: string, individual: Individual): Promise<void> {
+export async function updateIndividual(speciesId: string, id: string, individual: Individual): Promise<void> {
   const payload = normalizeIndividualForApi(individual);
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}`, {
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -73,8 +73,8 @@ export async function createIndividual(individual: Individual): Promise<Individu
   return await res.json();
 }
 
-export async function deleteIndividual(speciesCd: string, id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}`, {
+export async function deleteIndividual(speciesId: string, id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error('個体情報の削除に失敗しました');

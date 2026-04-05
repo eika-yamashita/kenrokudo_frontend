@@ -1,5 +1,5 @@
 export interface Individual {
-  species_cd: string;
+  species_id: string;
   id: string;
   male_parent_id?: string;
   female_parent_id?: string;

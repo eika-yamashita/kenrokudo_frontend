@@ -1,17 +1,17 @@
-﻿import { API_BASE } from './apiBase';
+import { API_BASE } from './apiBase';
 import { IndividualImage } from './models/IndividualImage';
 
 export async function getIndividualImages(
-  speciesCd: string,
+  speciesId: string,
   id: string
 ): Promise<IndividualImage[]> {
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}/images`);
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}/images`);
   if (!res.ok) throw new Error('画像一覧の取得に失敗しました');
   return await res.json();
 }
 
 export async function uploadIndividualImage(
-  speciesCd: string,
+  speciesId: string,
   id: string,
   file: File,
   isPrimary?: boolean
@@ -22,7 +22,7 @@ export async function uploadIndividualImage(
     formData.append('isPrimary', String(isPrimary));
   }
 
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}/images`, {
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}/images`, {
     method: 'POST',
     body: formData,
   });
@@ -31,7 +31,7 @@ export async function uploadIndividualImage(
 }
 
 export async function replaceIndividualImage(
-  speciesCd: string,
+  speciesId: string,
   id: string,
   imageId: number,
   file: File,
@@ -43,7 +43,7 @@ export async function replaceIndividualImage(
     formData.append('isPrimary', String(isPrimary));
   }
 
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}/images/${imageId}`, {
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}/images/${imageId}`, {
     method: 'PUT',
     body: formData,
   });
@@ -52,22 +52,22 @@ export async function replaceIndividualImage(
 }
 
 export async function deleteIndividualImage(
-  speciesCd: string,
+  speciesId: string,
   id: string,
   imageId: number
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}/images/${imageId}`, {
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}/images/${imageId}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error('画像の削除に失敗しました');
 }
 
 export async function setPrimaryIndividualImage(
-  speciesCd: string,
+  speciesId: string,
   id: string,
   imageId: number
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/individuals/${speciesCd}/${id}/images/${imageId}/primary`, {
+  const res = await fetch(`${API_BASE}/individuals/${speciesId}/${id}/images/${imageId}/primary`, {
     method: 'PUT',
   });
   if (!res.ok) throw new Error('メイン画像の設定に失敗しました');

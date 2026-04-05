@@ -3,9 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getIndividualImages } from '../api/IndividualImageService';
 import type { IndividualImage } from '../api/models/IndividualImage';
 import { useIndividualEditor } from '../hooks/useIndividualEditor';
+import { formatDateTimeYmdHm, formatDateYmd } from '../utils/dateFormat';
 
 const fieldRows: Array<{ label: string; valueKey: keyof NonNullable<ReturnType<typeof useIndividualEditor>['individual']> }> = [
-  { label: '種コード', valueKey: 'species_cd' },
+  { label: '種コード', valueKey: 'species_id' },
   { label: '個体ID', valueKey: 'id' },
   { label: 'オス親ID', valueKey: 'male_parent_id' },
   { label: 'メス親ID', valueKey: 'female_parent_id' },
@@ -27,18 +28,14 @@ const fieldRows: Array<{ label: string; valueKey: keyof NonNullable<ReturnType<t
   { label: '販売日', valueKey: 'sales_date' },
   { label: '死亡日', valueKey: 'death_date' },
   { label: 'メモ', valueKey: 'note' },
-  { label: '作成者', valueKey: 'create_user' },
-  { label: '作成日時', valueKey: 'create_at' },
-  { label: '更新者', valueKey: 'update_user' },
-  { label: '更新日時', valueKey: 'update_at' },
 ];
 
 export const IndividualDetailPage = () => {
-  const { species_cd: speciesCd, id } = useParams<{ species_cd: string; id: string }>();
+  const { species_id: speciesId, id } = useParams<{ species_id: string; id: string }>();
   const navigate = useNavigate();
 
   const { individual, loading, error } = useIndividualEditor({
-    species: speciesCd!,
+    species: speciesId!,
     individualId: id!,
   });
 
@@ -46,13 +43,48 @@ export const IndividualDetailPage = () => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState<string | null>(null);
 
+  const breedingCategoryLabelMap: Record<string, string> = {
+    '0': '0: 自家繁殖',
+    '1': '1: 購入個体',
+  };
+
+  const dateKeys = new Set([
+    'hatch_date',
+    'clutch_date',
+    'purchase_date',
+    'sales_date',
+    'death_date',
+  ]);
+
+  const formatDetailValue = (key: string, raw: unknown) => {
+    if (raw === null || raw === undefined || raw === '') {
+      return '-';
+    }
+
+    const value = String(raw);
+
+    if (key === 'breeding_category') {
+      return breedingCategoryLabelMap[value] ?? value;
+    }
+
+    if (key === 'create_at' || key === 'update_at') {
+      return formatDateTimeYmdHm(value);
+    }
+
+    if (dateKeys.has(key)) {
+      return formatDateYmd(value);
+    }
+
+    return value;
+  };
+
   useEffect(() => {
     const loadImages = async () => {
-      if (!speciesCd || !id) return;
+      if (!speciesId || !id) return;
       setImageLoading(true);
       setImageError(null);
       try {
-        const list = await getIndividualImages(speciesCd, id);
+        const list = await getIndividualImages(speciesId, id);
         setImages(list);
       } catch (e: any) {
         setImageError(e.message ?? '画像の取得に失敗しました');
@@ -62,7 +94,7 @@ export const IndividualDetailPage = () => {
     };
 
     loadImages();
-  }, [speciesCd, id]);
+  }, [speciesId, id]);
 
   if (loading) return <div className="status-message">読み込み中...</div>;
   if (!individual) return <div className="status-message">データが見つかりません</div>;
@@ -75,14 +107,14 @@ export const IndividualDetailPage = () => {
         </button>
         <h1>個体詳細</h1>
         <p>
-          種コード: <strong>{individual.species_cd}</strong> / 個体ID: <strong>{individual.id}</strong>
+          種コード: <strong>{individual.species_id}</strong> / 個体ID: <strong>{individual.id}</strong>
         </p>
       </div>
 
       <div className="form-actions">
         <button
           className="primary-button"
-          onClick={() => navigate(`/admin/edit/${individual.species_cd}/${individual.id}`)}
+          onClick={() => navigate(`/admin/edit/${individual.species_id}/${individual.id}`)}
         >
           編集する
         </button>
@@ -113,7 +145,7 @@ export const IndividualDetailPage = () => {
           {fieldRows.map(({ label, valueKey }) => (
             <div key={String(valueKey)} className="detail-item">
               <dt>{label}</dt>
-              <dd>{String(individual[valueKey] ?? '-')}</dd>
+              <dd>{formatDetailValue(String(valueKey), individual[valueKey])}</dd>
             </div>
           ))}
         </div>
