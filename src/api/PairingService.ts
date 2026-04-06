@@ -28,16 +28,29 @@ const buildErrorMessage = async (res: Response, fallback: string) => {
   }
 };
 
+const parseJsonResponse = async <T>(res: Response, fallback: string): Promise<T> => {
+  const text = await res.text();
+  if (!text.trim()) {
+    throw new Error(fallback);
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error('APIレスポンスがJSONではありません。プロキシ設定をご確認ください。');
+  }
+};
+
 export async function getPairingList(): Promise<Pairing[]> {
   const res = await fetch(`${API_BASE}/pairings`);
   if (!res.ok) throw new Error('ペアリング一覧の取得に失敗しました');
-  return await res.json();
+  return await parseJsonResponse<Pairing[]>(res, 'ペアリング一覧の取得に失敗しました');
 }
 
 export async function getPairing(speciesId: string, fiscalYear: number, pairingId: string): Promise<Pairing> {
   const res = await fetch(`${API_BASE}/pairings/${speciesId}/${fiscalYear}/${pairingId}`);
   if (!res.ok) throw new Error('ペアリング情報の取得に失敗しました');
-  return await res.json();
+  return await parseJsonResponse<Pairing>(res, 'ペアリング情報の取得に失敗しました');
 }
 
 export async function createPairing(pairing: Pairing): Promise<Pairing> {
@@ -52,7 +65,7 @@ export async function createPairing(pairing: Pairing): Promise<Pairing> {
     throw new Error(await buildErrorMessage(res, 'ペアリング情報の登録に失敗しました'));
   }
 
-  return await res.json();
+  return await parseJsonResponse<Pairing>(res, 'ペアリング情報の登録に失敗しました');
 }
 
 export async function updatePairing(
@@ -72,7 +85,7 @@ export async function updatePairing(
     throw new Error(await buildErrorMessage(res, 'ペアリング情報の更新に失敗しました'));
   }
 
-  return await res.json();
+  return await parseJsonResponse<Pairing>(res, 'ペアリング情報の更新に失敗しました');
 }
 
 export async function deletePairing(speciesId: string, fiscalYear: number, pairingId: string): Promise<void> {
