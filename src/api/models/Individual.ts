@@ -1,6 +1,8 @@
 export interface Individual {
   species_id: string;
   id: string;
+  pairing_fiscal_year?: number;
+  pairing_id?: string;
   male_parent_id?: string;
   female_parent_id?: string;
   morph?: string;

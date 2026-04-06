@@ -1,11 +1,14 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { uploadIndividualImage } from '../api/IndividualImageService';
+import { getPairingList } from '../api/PairingService';
 import { getSpeciesList } from '../api/SpeciesService';
+import type { Pairing } from '../api/models/Pairing';
 import type { Species } from '../api/models/Species';
 import { useIndividualCreator } from '../hooks/useIndividualCreator';
 import { toDateInputValue } from '../utils/dateFormat';
 import { genderCategoryOptions } from '../utils/genderCategory';
+import { normalizeIdInput } from '../utils/idNormalizer';
 
 export const IndividualCreatePage = () => {
   const navigate = useNavigate();
@@ -15,37 +18,64 @@ export const IndividualCreatePage = () => {
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [speciesList, setSpeciesList] = useState<Species[]>([]);
+  const [pairingList, setPairingList] = useState<Pairing[]>([]);
   const [speciesLoading, setSpeciesLoading] = useState(true);
+  const [pairingLoading, setPairingLoading] = useState(true);
   const breedingCategoryOptions = [
     { value: '0', label: '0: 自家繁殖' },
     { value: '1', label: '1: 購入個体' },
   ];
 
+  const filteredPairings = useMemo(
+    () =>
+      pairingList
+        .filter((pairing) => pairing.species_id === individual.species_id)
+        .sort((a, b) => {
+          const yearDiff = (b.fiscal_year ?? 0) - (a.fiscal_year ?? 0);
+          if (yearDiff !== 0) return yearDiff;
+          return (a.pairing_id ?? '').localeCompare(b.pairing_id ?? '');
+        }),
+    [pairingList, individual.species_id]
+  );
+
+  const selectedPairingKey =
+    individual.pairing_fiscal_year !== undefined && individual.pairing_id
+      ? `${individual.pairing_fiscal_year}|${individual.pairing_id}`
+      : '';
+  const pairingSelected = Boolean(selectedPairingKey);
+
   useEffect(() => {
     let cancelled = false;
 
-    const loadSpecies = async () => {
+    const loadMasterData = async () => {
       try {
-        const list = await getSpeciesList();
+        const [species, pairings] = await Promise.all([getSpeciesList(), getPairingList()]);
         if (!cancelled) {
-          setSpeciesList(list);
-          if (!individual.species_id && list.length > 0) {
-            updateField('species_id', list[0].species_id);
+          setSpeciesList(species);
+          setPairingList(pairings);
+          if (!individual.species_id && species.length > 0) {
+            updateField('species_id', species[0].species_id);
           }
         }
       } catch {
-        if (!cancelled) setSpeciesList([]);
+        if (!cancelled) {
+          setSpeciesList([]);
+          setPairingList([]);
+        }
       } finally {
-        if (!cancelled) setSpeciesLoading(false);
+        if (!cancelled) {
+          setSpeciesLoading(false);
+          setPairingLoading(false);
+        }
       }
     };
 
-    loadSpecies();
+    loadMasterData();
 
     return () => {
       cancelled = true;
     };
-  }, [individual.species_id, updateField]);
+  }, [updateField]);
 
   useEffect(() => {
     const previewUrls = imageFiles.map((file) => URL.createObjectURL(file));
@@ -55,6 +85,41 @@ export const IndividualCreatePage = () => {
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [imageFiles]);
+
+  const handleSpeciesChange = (speciesId: string) => {
+    updateField('species_id', speciesId);
+    updateField('pairing_fiscal_year', undefined);
+    updateField('pairing_id', undefined);
+    updateField('male_parent_id', '');
+    updateField('female_parent_id', '');
+  };
+
+  const handlePairingChange = (value: string) => {
+    if (!value) {
+      updateField('pairing_fiscal_year', undefined);
+      updateField('pairing_id', undefined);
+      updateField('male_parent_id', '');
+      updateField('female_parent_id', '');
+      return;
+    }
+
+    const [fiscalYearStr, pairingId] = value.split('|');
+    const fiscalYear = Number(fiscalYearStr);
+    const selected = filteredPairings.find(
+      (pairing) => pairing.fiscal_year === fiscalYear && pairing.pairing_id === pairingId
+    );
+
+    if (Number.isNaN(fiscalYear) || !selected) {
+      updateField('pairing_fiscal_year', undefined);
+      updateField('pairing_id', undefined);
+      return;
+    }
+
+    updateField('pairing_fiscal_year', fiscalYear);
+    updateField('pairing_id', pairingId);
+    updateField('male_parent_id', selected.male_parent_id);
+    updateField('female_parent_id', selected.female_parent_id);
+  };
 
   const handleSubmit = async () => {
     if (!individual.species_id) {
@@ -140,7 +205,7 @@ export const IndividualCreatePage = () => {
           種名
           <select
             value={individual.species_id}
-            onChange={(e) => updateField('species_id', e.target.value)}
+            onChange={(e) => handleSpeciesChange(e.target.value)}
             disabled={speciesLoading || speciesList.length === 0}
           >
             {speciesList.length === 0 && <option value="">種マスタ未登録</option>}
@@ -167,14 +232,38 @@ export const IndividualCreatePage = () => {
           </select>
         </label>
         <label>
+          ペアリングID
+          <select
+            value={selectedPairingKey}
+            onChange={(e) => handlePairingChange(e.target.value)}
+            disabled={pairingLoading || !individual.species_id}
+          >
+            <option value="">選択なし（親IDを手入力）</option>
+            {filteredPairings.map((pairing) => {
+              const optionKey = `${pairing.fiscal_year}|${pairing.pairing_id}`;
+              return (
+                <option key={optionKey} value={optionKey}>
+                  {`${pairing.fiscal_year} / ${pairing.pairing_id} (M:${pairing.male_parent_id} F:${pairing.female_parent_id})`}
+                </option>
+              );
+            })}
+          </select>
+        </label>
+        <label>
           個体ID
-          <input value={individual.id} onChange={(e) => updateField('id', e.target.value)} />
+          <input
+            value={individual.id}
+            onChange={(e) => updateField('id', e.target.value)}
+            onBlur={(e) => updateField('id', normalizeIdInput(e.target.value))}
+          />
         </label>
         <label>
           オス親ID
           <input
             value={individual.male_parent_id ?? ''}
             onChange={(e) => updateField('male_parent_id', e.target.value)}
+            onBlur={(e) => updateField('male_parent_id', normalizeIdInput(e.target.value))}
+            disabled={pairingSelected}
           />
         </label>
         <label>
@@ -182,6 +271,8 @@ export const IndividualCreatePage = () => {
           <input
             value={individual.female_parent_id ?? ''}
             onChange={(e) => updateField('female_parent_id', e.target.value)}
+            onBlur={(e) => updateField('female_parent_id', normalizeIdInput(e.target.value))}
+            disabled={pairingSelected}
           />
         </label>
         <label>

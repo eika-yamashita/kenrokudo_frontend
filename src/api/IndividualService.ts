@@ -9,6 +9,8 @@ const toNullableNumber = (value: number | undefined | null | string) =>
 
 const normalizeIndividualForApi = (individual: Individual) => ({
   ...individual,
+  pairing_fiscal_year: toNullableNumber(individual.pairing_fiscal_year as number | undefined),
+  pairing_id: toNullableString(individual.pairing_id),
   male_parent_id: toNullableString(individual.male_parent_id),
   female_parent_id: toNullableString(individual.female_parent_id),
   morph: toNullableString(individual.morph),

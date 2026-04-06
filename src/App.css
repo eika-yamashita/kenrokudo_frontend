@@ -267,6 +267,10 @@
   font-size: 1rem;
 }
 
+.pairing-toolbar {
+  margin-bottom: 18px;
+}
+
 .primary-button,
 .ghost-button {
   appearance: none;
@@ -276,6 +280,8 @@
   text-decoration: none;
   border: 1px solid transparent;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.12);
+  touch-action: manipulation;
 }
 
 .primary-button {
@@ -296,6 +302,19 @@
 .individual-table a:hover,
 .brand-link:hover {
   transform: translateY(-1px);
+}
+
+.primary-button:active {
+  transform: translateY(0);
+  background: #1f1f1f;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+}
+
+.ghost-button:active {
+  transform: translateY(0);
+  background: #f0f0f0;
+  border-color: #000000;
+  box-shadow: inset 0 0 0 1px #000000;
 }
 
 .admin-page,
@@ -389,10 +408,16 @@
 
 .row-clickable {
   cursor: pointer;
+  transition: background-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .row-clickable:hover {
-  background: #f7f7f7;
+  background: #f2f2f2;
+}
+
+.row-clickable:active {
+  background: #e7e7e7;
+  box-shadow: inset 0 0 0 1px #555555;
 }
 
 .row-clickable:focus {
@@ -409,6 +434,21 @@
 .individual-table .species-cell {
   min-width: 96px;
   white-space: nowrap;
+}
+
+.pairing-table {
+  min-width: 980px;
+}
+
+.pairing-table th,
+.pairing-table td {
+  min-width: 84px;
+  white-space: nowrap;
+}
+
+.pairing-table .pairing-note-cell {
+  min-width: 180px;
+  white-space: normal;
 }
 
 .individual-thumb {
@@ -676,6 +716,18 @@
 
   .compact-form {
     max-width: none;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .primary-button:active,
+  .ghost-button:active {
+    transform: scale(0.98);
+  }
+
+  .row-clickable:active {
+    background: #e1e1e1;
+    box-shadow: inset 0 0 0 1px #444444;
   }
 }
 

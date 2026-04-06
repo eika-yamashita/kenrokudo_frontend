@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deletePairing, getPairingList } from '../api/PairingService';
+import { getPairingList } from '../api/PairingService';
 import { getSpeciesList } from '../api/SpeciesService';
 import type { Pairing } from '../api/models/Pairing';
 
@@ -33,16 +33,9 @@ export const PairingListPage = () => {
     loadPairings();
   }, []);
 
-  const handleDelete = async (pairing: Pairing) => {
+  const handleRowNavigate = (pairing: Pairing) => {
     if (!pairing.fiscal_year || !pairing.pairing_id) return;
-    if (!window.confirm('このペアリング情報を削除しますか？')) return;
-
-    try {
-      await deletePairing(pairing.species_id, pairing.fiscal_year, pairing.pairing_id);
-      await loadPairings();
-    } catch (e: any) {
-      setError(e.message ?? 'ペアリング情報の削除に失敗しました');
-    }
+    navigate(`/admin/pairings/edit/${pairing.species_id}/${pairing.fiscal_year}/${pairing.pairing_id}`);
   };
 
   if (loading) {
@@ -58,7 +51,7 @@ export const PairingListPage = () => {
         <h1>ペアリング一覧</h1>
       </div>
 
-      <div className="toolbar">
+      <div className="toolbar pairing-toolbar">
         <button className="primary-button" onClick={() => navigate('/admin/pairings/new')}>
           新規登録
         </button>
@@ -67,7 +60,7 @@ export const PairingListPage = () => {
       {error && <div className="status-message error-message">{error}</div>}
 
       <div className="table-wrap">
-        <table className="individual-table">
+        <table className="individual-table pairing-table">
           <thead>
             <tr>
               <th>種名</th>
@@ -78,17 +71,28 @@ export const PairingListPage = () => {
               <th>メス親ID</th>
               <th>ペアリング日</th>
               <th>備考</th>
-              <th>操作</th>
             </tr>
           </thead>
           <tbody>
             {pairings.length === 0 && (
               <tr>
-                <td colSpan={9}>ペアリング情報は未登録です</td>
+                <td colSpan={8}>ペアリング情報は未登録です</td>
               </tr>
             )}
             {pairings.map((pairing) => (
-              <tr key={`${pairing.species_id}-${pairing.fiscal_year}-${pairing.pairing_id}`}>
+              <tr
+                key={`${pairing.species_id}-${pairing.fiscal_year}-${pairing.pairing_id}`}
+                className="row-clickable"
+                onClick={() => handleRowNavigate(pairing)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleRowNavigate(pairing);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+              >
                 <td>{speciesNames[pairing.species_id] ?? pairing.species_id}</td>
                 <td>{pairing.species_id}</td>
                 <td>{pairing.fiscal_year ?? '-'}</td>
@@ -96,24 +100,7 @@ export const PairingListPage = () => {
                 <td>{pairing.male_parent_id}</td>
                 <td>{pairing.female_parent_id}</td>
                 <td>{pairing.pairing_date}</td>
-                <td>{pairing.note || '-'}</td>
-                <td>
-                  <div className="inline-actions">
-                    <button
-                      className="ghost-button"
-                      onClick={() =>
-                        navigate(
-                          `/admin/pairings/edit/${pairing.species_id}/${pairing.fiscal_year}/${pairing.pairing_id}`
-                        )
-                      }
-                    >
-                      編集
-                    </button>
-                    <button className="ghost-button" onClick={() => handleDelete(pairing)}>
-                      削除
-                    </button>
-                  </div>
-                </td>
+                <td className="pairing-note-cell">{pairing.note || '-'}</td>
               </tr>
             ))}
           </tbody>

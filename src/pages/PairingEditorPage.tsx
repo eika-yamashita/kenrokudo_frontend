@@ -7,6 +7,7 @@ import type { Pairing } from '../api/models/Pairing';
 import type { Species } from '../api/models/Species';
 import type { Individual } from '../api/models/Individual';
 import { isFemaleCategory, isMaleCategory } from '../utils/genderFilter';
+import { normalizeIdInput } from '../utils/idNormalizer';
 
 const toDateInput = (value: string | undefined) => value ?? '';
 
@@ -181,6 +182,7 @@ export const PairingEditorPage = () => {
             list="male-parent-candidates-edit"
             value={pairing.male_parent_id}
             onChange={(e) => updateField('male_parent_id', e.target.value)}
+            onBlur={(e) => updateField('male_parent_id', normalizeIdInput(e.target.value))}
             placeholder="候補選択 or 直接入力"
           />
           <datalist id="male-parent-candidates-edit">
@@ -200,6 +202,7 @@ export const PairingEditorPage = () => {
             list="female-parent-candidates-edit"
             value={pairing.female_parent_id}
             onChange={(e) => updateField('female_parent_id', e.target.value)}
+            onBlur={(e) => updateField('female_parent_id', normalizeIdInput(e.target.value))}
             placeholder="候補選択 or 直接入力"
           />
           <datalist id="female-parent-candidates-edit">

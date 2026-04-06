@@ -12,6 +12,7 @@ import type { IndividualImage } from '../api/models/IndividualImage';
 import { useIndividualEditor } from '../hooks/useIndividualEditor';
 import { toDateInputValue } from '../utils/dateFormat';
 import { genderCategoryOptions } from '../utils/genderCategory';
+import { normalizeIdInput } from '../utils/idNormalizer';
 
 export const IndividualEditorPage = () => {
   const { species_id: speciesId, id } = useParams<{
@@ -215,6 +216,7 @@ export const IndividualEditorPage = () => {
             <input
               value={individual.male_parent_id ?? ''}
               onChange={(e) => updateField('male_parent_id', e.target.value)}
+              onBlur={(e) => updateField('male_parent_id', normalizeIdInput(e.target.value))}
             />
           </label>
           <label>
@@ -222,6 +224,7 @@ export const IndividualEditorPage = () => {
             <input
               value={individual.female_parent_id ?? ''}
               onChange={(e) => updateField('female_parent_id', e.target.value)}
+              onBlur={(e) => updateField('female_parent_id', normalizeIdInput(e.target.value))}
             />
           </label>
           <label>
