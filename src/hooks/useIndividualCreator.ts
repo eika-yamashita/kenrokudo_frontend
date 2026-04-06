@@ -2,9 +2,21 @@ import { useCallback, useState } from 'react';
 import { createIndividual } from '../api/IndividualService';
 import type { Individual } from '../api/models/Individual';
 
+const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const initialIndividual: Individual = {
   species_id: '',
   id: '',
+  gender_category: '0',
+  breeding_category: '0',
+  breeder: '絢禄堂',
+  hatch_date: getTodayDateString(),
   create_user: 'system',
   create_at: new Date().toISOString().slice(0, 16),
 };

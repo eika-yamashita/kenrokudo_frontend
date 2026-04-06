@@ -22,8 +22,13 @@ export const IndividualCreatePage = () => {
   const [speciesLoading, setSpeciesLoading] = useState(true);
   const [pairingLoading, setPairingLoading] = useState(true);
   const breedingCategoryOptions = [
-    { value: '0', label: '0: 自家繁殖' },
-    { value: '1', label: '1: 購入個体' },
+    { value: '0', label: '自家繁殖' },
+    { value: '1', label: '購入個体' },
+  ];
+  const salesCategoryOptions = [
+    { value: '0', label: '非売個体' },
+    { value: '1', label: '販売中' },
+    { value: '2', label: '販売済' },
   ];
 
   const filteredPairings = useMemo(
@@ -43,6 +48,7 @@ export const IndividualCreatePage = () => {
       ? `${individual.pairing_fiscal_year}|${individual.pairing_id}`
       : '';
   const pairingSelected = Boolean(selectedPairingKey);
+  const isPurchaseIndividual = individual.breeding_category === '1';
 
   useEffect(() => {
     let cancelled = false;
@@ -119,6 +125,20 @@ export const IndividualCreatePage = () => {
     updateField('pairing_id', pairingId);
     updateField('male_parent_id', selected.male_parent_id);
     updateField('female_parent_id', selected.female_parent_id);
+  };
+
+  const handleBreedingCategoryChange = (value: string) => {
+    updateField('breeding_category', value);
+
+    if (value === '1') {
+      updateField('breeder', '');
+      return;
+    }
+
+    updateField('breeder', '絢禄堂');
+    updateField('purchase_from', '');
+    updateField('purchase_price', undefined);
+    updateField('purchase_date', '');
   };
 
   const handleSubmit = async () => {
@@ -219,11 +239,10 @@ export const IndividualCreatePage = () => {
         <label>
           繁殖区分
           <select
-            value={individual.breeding_category ?? ''}
-            onChange={(e) => updateField('breeding_category', e.target.value)}
+            value={individual.breeding_category ?? '0'}
+            onChange={(e) => handleBreedingCategoryChange(e.target.value)}
             required
           >
-            <option value="">選択してください</option>
             {breedingCategoryOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -289,10 +308,9 @@ export const IndividualCreatePage = () => {
         <label>
           雌雄区分
           <select
-            value={individual.gender_category ?? ''}
+            value={individual.gender_category ?? '0'}
             onChange={(e) => updateField('gender_category', e.target.value)}
           >
-            <option value="">選択してください</option>
             {genderCategoryOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -321,38 +339,51 @@ export const IndividualCreatePage = () => {
             onChange={(e) => updateField('clutch_date', e.target.value)}
           />
         </label>
-        <label>
-          購入元
-          <input
-            value={individual.purchase_from ?? ''}
-            onChange={(e) => updateField('purchase_from', e.target.value)}
-          />
-        </label>
-        <label>
-          購入価格
-          <input
-            type="number"
-            step="0.01"
-            value={individual.purchase_price ?? ''}
-            onChange={(e) =>
-              updateField('purchase_price', e.target.value === '' ? undefined : Number(e.target.value))
-            }
-          />
-        </label>
-        <label>
-          購入日
-          <input
-            type="date"
-            value={toDateInputValue(individual.purchase_date)}
-            onChange={(e) => updateField('purchase_date', e.target.value)}
-          />
-        </label>
+        {isPurchaseIndividual && (
+          <label>
+            購入元
+            <input
+              value={individual.purchase_from ?? ''}
+              onChange={(e) => updateField('purchase_from', e.target.value)}
+            />
+          </label>
+        )}
+        {isPurchaseIndividual && (
+          <label>
+            購入価格
+            <input
+              type="number"
+              step="0.01"
+              value={individual.purchase_price ?? ''}
+              onChange={(e) =>
+                updateField('purchase_price', e.target.value === '' ? undefined : Number(e.target.value))
+              }
+            />
+          </label>
+        )}
+        {isPurchaseIndividual && (
+          <label>
+            購入日
+            <input
+              type="date"
+              value={toDateInputValue(individual.purchase_date)}
+              onChange={(e) => updateField('purchase_date', e.target.value)}
+            />
+          </label>
+        )}
         <label>
           販売区分
-          <input
+          <select
             value={individual.sales_category ?? ''}
             onChange={(e) => updateField('sales_category', e.target.value)}
-          />
+          >
+            <option value="">未設定</option>
+            {salesCategoryOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           販売先

@@ -1,7 +1,7 @@
 export const genderCategoryOptions = [
-  { value: '0', label: '0: 不明' },
-  { value: '1', label: '1: ♂' },
-  { value: '2', label: '2: ♀' },
+  { value: '0', label: '不明' },
+  { value: '1', label: '♂' },
+  { value: '2', label: '♀' },
 ];
 
 const genderCategoryLabelMap: Record<string, string> = {
