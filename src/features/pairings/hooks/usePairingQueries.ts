@@ -5,6 +5,8 @@ import {
   deletePairing,
   fetchPairing,
   fetchPairingList,
+  searchPairings,
+  type PairingSearchParams,
   updatePairing,
 } from '../api/pairingApi';
 
@@ -14,6 +16,12 @@ export const usePairingsQuery = () =>
   useQuery({
     queryKey: pairingsQueryKey,
     queryFn: ({ signal }) => fetchPairingList(signal),
+  });
+
+export const usePairingSearchQuery = (params: PairingSearchParams) =>
+  useQuery({
+    queryKey: [...pairingsQueryKey, 'search', params.speciesId ?? '', params.fiscalYear ?? ''],
+    queryFn: ({ signal }) => searchPairings(params, signal),
   });
 
 export const usePairingQuery = (speciesId?: string, fiscalYear?: number, pairingId?: string) =>

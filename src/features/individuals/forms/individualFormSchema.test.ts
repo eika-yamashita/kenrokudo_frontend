@@ -36,4 +36,15 @@ describe('individualFormSchema', () => {
 
     expect(individualFormSchema.safeParse(values).success).toBe(true);
   });
+
+  it('accepts empty id for server-side auto numbering', () => {
+    const values = {
+      ...createEmptyIndividualFormValues(),
+      species_id: 'leo',
+      id: '',
+      hatch_date: '2026-04-08',
+    };
+
+    expect(individualFormSchema.safeParse(values).success).toBe(true);
+  });
 });

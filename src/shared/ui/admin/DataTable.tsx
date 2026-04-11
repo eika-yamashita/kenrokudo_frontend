@@ -14,9 +14,18 @@ type Props<T> = {
   getRowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
   density?: 'default' | 'compact';
+  noWrap?: boolean;
 };
 
-export function DataTable<T>({ columns, rows, emptyMessage, getRowKey, onRowClick, density = 'default' }: Props<T>) {
+export function DataTable<T>({
+  columns,
+  rows,
+  emptyMessage,
+  getRowKey,
+  onRowClick,
+  density = 'default',
+  noWrap = false,
+}: Props<T>) {
   const handleKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, row: T) => {
     if (!onRowClick) return;
 
@@ -28,7 +37,9 @@ export function DataTable<T>({ columns, rows, emptyMessage, getRowKey, onRowClic
 
   return (
     <div className={styles.tableWrap}>
-      <table className={`${styles.table} ${density === 'compact' ? styles.tableCompact : ''}`}>
+      <table
+        className={`${styles.table} ${density === 'compact' ? styles.tableCompact : ''} ${noWrap ? styles.tableNoWrap : ''}`}
+      >
         <thead>
           <tr>
             {columns.map((column) => (

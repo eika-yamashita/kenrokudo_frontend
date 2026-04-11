@@ -57,6 +57,21 @@
   margin-bottom: 20px;
 }
 
+.searchForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.searchActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .formActionsStickyTop {
   position: sticky;
   top: 74px;
@@ -171,6 +186,11 @@
 
 .tableCompact td {
   line-height: 1.2;
+}
+
+.tableNoWrap th,
+.tableNoWrap td {
+  white-space: nowrap;
 }
 
 .table th {
@@ -588,6 +608,10 @@
 
   .table {
     min-width: 600px;
+  }
+
+  .searchForm {
+    grid-template-columns: 1fr;
   }
 
   .imageMainPlaceholder {

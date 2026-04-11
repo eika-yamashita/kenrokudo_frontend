@@ -1,6 +1,11 @@
 import type { Pairing } from '../../../api/models/Pairing';
 import { apiClient } from '../../../shared/api/apiClient';
 
+export type PairingSearchParams = {
+  speciesId?: string;
+  fiscalYear?: number;
+};
+
 const toNullableString = (value: string | undefined | null) =>
   value === undefined || value === null || value === '' ? null : value;
 
@@ -10,8 +15,23 @@ const normalizePairingForApi = (pairing: Pairing) => ({
   note: toNullableString(pairing.note),
 });
 
+const toSearchQueryString = ({ speciesId, fiscalYear }: PairingSearchParams) => {
+  const params = new URLSearchParams();
+  if (speciesId) params.set('species_id', speciesId);
+  if (fiscalYear !== undefined) params.set('fiscal_year', String(fiscalYear));
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
+
 export const fetchPairingList = (signal?: AbortSignal) =>
   apiClient.get<Pairing[]>('/pairings', 'ペアリング一覧の取得に失敗しました', signal);
+
+export const searchPairings = (params: PairingSearchParams, signal?: AbortSignal) =>
+  apiClient.get<Pairing[]>(
+    `/pairings/search${toSearchQueryString(params)}`,
+    'Failed to search pairings',
+    signal
+  );
 
 export const fetchPairing = (speciesId: string, fiscalYear: number, pairingId: string, signal?: AbortSignal) =>
   apiClient.get<Pairing>(

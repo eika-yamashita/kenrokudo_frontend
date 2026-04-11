@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { IndividualListScreen } from './IndividualListScreen';
 
 const mockNavigate = jest.fn();
@@ -16,7 +16,7 @@ jest.mock('../../species/hooks/useSpeciesQuery', () => ({
 }));
 
 jest.mock('../hooks/useIndividualQueries', () => ({
-  useIndividualsQuery: () => ({
+  useIndividualSearchQuery: () => ({
     isLoading: false,
     error: null,
     data: [
@@ -42,7 +42,8 @@ describe('IndividualListScreen', () => {
       <IndividualListScreen />
     );
 
-    expect(screen.getByText('Leopard Gecko')).toBeInTheDocument();
-    expect(screen.getByText('Mack Snow')).toBeInTheDocument();
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('Leopard Gecko')).toBeInTheDocument();
+    expect(within(table).getByText('Mack Snow')).toBeInTheDocument();
   });
 });

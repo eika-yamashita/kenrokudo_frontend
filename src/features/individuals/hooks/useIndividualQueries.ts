@@ -7,8 +7,10 @@ import {
   fetchIndividual,
   fetchIndividualImages,
   fetchIndividuals,
+  searchIndividuals,
   replaceIndividualImage,
   setPrimaryIndividualImage,
+  type IndividualSearchParams,
   updateIndividual,
   uploadIndividualImage,
 } from '../api/individualApi';
@@ -19,6 +21,12 @@ export const useIndividualsQuery = () =>
   useQuery({
     queryKey: individualsQueryKey,
     queryFn: ({ signal }) => fetchIndividuals(signal),
+  });
+
+export const useIndividualSearchQuery = (params: IndividualSearchParams) =>
+  useQuery({
+    queryKey: [...individualsQueryKey, 'search', params.speciesId ?? '', params.fiscalYear ?? '', params.morph ?? ''],
+    queryFn: ({ signal }) => searchIndividuals(params, signal),
   });
 
 export const useIndividualQuery = (speciesId?: string, id?: string) =>

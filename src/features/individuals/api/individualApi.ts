@@ -2,6 +2,12 @@ import type { Individual } from '../../../api/models/Individual';
 import type { IndividualImage } from '../../../api/models/IndividualImage';
 import { apiClient, ApiError } from '../../../shared/api/apiClient';
 
+export type IndividualSearchParams = {
+  speciesId?: string;
+  fiscalYear?: number;
+  morph?: string;
+};
+
 const toNullableString = (value: string | undefined | null) =>
   value === undefined || value === null || value === '' ? null : value;
 
@@ -10,6 +16,7 @@ const toNullableNumber = (value: number | undefined | null | string) =>
 
 const normalizeIndividualForApi = (individual: Individual) => ({
   ...individual,
+  id: toNullableString(individual.id),
   pairing_fiscal_year: toNullableNumber(individual.pairing_fiscal_year as number | undefined),
   pairing_id: toNullableString(individual.pairing_id),
   male_parent_id: toNullableString(individual.male_parent_id),
@@ -36,11 +43,42 @@ const normalizeIndividualForApi = (individual: Individual) => ({
   update_at: toNullableString(individual.update_at),
 });
 
+const toSearchQueryString = ({ speciesId, fiscalYear, morph }: IndividualSearchParams) => {
+  const params = new URLSearchParams();
+  if (speciesId) params.set('species_id', speciesId);
+  if (fiscalYear !== undefined) params.set('fiscal_year', String(fiscalYear));
+  if (morph?.trim()) params.set('morph', morph.trim());
+  const query = params.toString();
+  return query ? `?${query}` : '';
+};
+
+/*
 export const fetchIndividuals = (signal?: AbortSignal) =>
+  apiClient.get<Individual[]>('/individuals', '蛟倶ｽ謎ｸ隕ｧ縺ｮ蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆', signal);
+
+export const searchIndividuals = (params: IndividualSearchParams, signal?: AbortSignal) =>
+  apiClient.get<Individual[]>(
+    `/individuals/search${toSearchQueryString(params)}`,
+    '蛟倶ｽ謎ｸ隕ｧ縺ｮ讀懃ｴ｢縺ｫ螟ｱ謨励＠縺ｾ縺励◆',
+    signal
+  );
+
+export const fetchIndividual = (speciesId: string, id: string, signal?: AbortSignal) =>
   apiClient.get<Individual[]>('/individuals', '個体一覧の取得に失敗しました', signal);
 
 export const fetchIndividual = (speciesId: string, id: string, signal?: AbortSignal) =>
   apiClient.get<Individual>(`/individuals/${speciesId}/${id}`, '個体情報の取得に失敗しました', signal);
+
+*/
+
+export const fetchIndividuals = (signal?: AbortSignal) =>
+  apiClient.get<Individual[]>('/individuals', 'Failed to fetch individuals', signal);
+
+export const searchIndividuals = (params: IndividualSearchParams, signal?: AbortSignal) =>
+  apiClient.get<Individual[]>(`/individuals/search${toSearchQueryString(params)}`, 'Failed to search individuals', signal);
+
+export const fetchIndividual = (speciesId: string, id: string, signal?: AbortSignal) =>
+  apiClient.get<Individual>(`/individuals/${speciesId}/${id}`, 'Failed to fetch individual', signal);
 
 export const createIndividual = async (individual: Individual) => {
   try {

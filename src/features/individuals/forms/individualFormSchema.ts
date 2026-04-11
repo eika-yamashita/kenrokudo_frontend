@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const individualFormSchema = z
   .object({
     species_id: z.string().trim().min(1, '種を選択してください'),
-    id: z.string().trim().min(1, '個体IDを入力してください'),
+    id: z.string().trim(),
     pairing_fiscal_year: z.string().trim(),
     pairing_id: z.string().trim(),
     male_parent_id: z.string().trim(),
