@@ -228,6 +228,10 @@
     min-height: 420px;
   }
 
+  .heroImage {
+    object-position: right 30%;
+  }
+
   .heroContent {
     padding: 20px 16px;
   }

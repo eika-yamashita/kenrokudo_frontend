@@ -11,7 +11,7 @@ export const HomeScreen = () => {
             <h1>
               絢禄堂
               <br />
-              KENROKUDO
+              -KENROKUDO-
             </h1>
           </div>
         </div>

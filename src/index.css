@@ -5,6 +5,8 @@
   -moz-osx-font-smoothing: grayscale;
   background: var(--page-bg);
   color: var(--text-main);
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 code {
@@ -28,4 +30,9 @@ textarea:focus {
   outline: none;
   box-shadow: var(--focus-ring);
   border-color: var(--accent);
+}
+html,
+body,
+#root {
+  min-height: 100%;
 }
