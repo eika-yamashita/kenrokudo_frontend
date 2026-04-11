@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from 'react';
+﻿import { useId, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from 'react';
 import { adminStyles } from '../../../shared/ui/admin';
 
 type Props = {
@@ -71,8 +71,7 @@ export const ImageUploadPicker = ({ files, previews, primaryIndex, onFilesChange
   };
 
   return (
-    <div className={adminStyles.panel}>
-      <h2>画像アップロード</h2>
+    <div className={adminStyles.sectionPlain}>
       <input
         id={inputId}
         ref={inputRef}

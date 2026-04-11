@@ -1,4 +1,4 @@
-import type { IndividualImage } from '../../../api/models/IndividualImage';
+﻿import type { IndividualImage } from '../../../api/models/IndividualImage';
 import { StatusBanner, adminStyles } from '../../../shared/ui/admin';
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 
 export const IndividualImageManager = ({ images, loading, error, onSetPrimary, onReplace, onDelete }: Props) => {
   return (
-    <div className={adminStyles.panel}>
+    <div className={adminStyles.sectionPlain}>
       <h2>登録済み画像</h2>
       {loading ? <StatusBanner>画像を読み込み中...</StatusBanner> : null}
       {error ? <StatusBanner tone="error">{error}</StatusBanner> : null}

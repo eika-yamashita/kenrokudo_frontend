@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
   AdminPageLayout,
-  FormActions,
   PageHeader,
   StatusBanner,
   adminStyles,
@@ -33,6 +32,7 @@ type Props = {
 };
 
 export const IndividualEditScreen = ({ speciesId, id }: Props) => {
+  const formId = 'individual-edit-form';
   const navigate = useNavigate();
   const individualQuery = useIndividualQuery(speciesId, id);
   const imagesQuery = useIndividualImagesQuery(speciesId, id);
@@ -118,24 +118,26 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
   return (
     <AdminPageLayout>
       <PageHeader
-        title="個体情報の編集"
-        description={
-          <p>
-            種: <strong>{getSpeciesLabel(speciesId, speciesQuery.data)}</strong> / 個体ID:{' '}
-            <strong>{individualQuery.data.id}</strong>
-          </p>
-        }
+        title={`${getSpeciesLabel(speciesId, speciesQuery.data)} / ${individualQuery.data.id}`}
+        stickyActions
         actions={
-          <button
-            className={adminStyles.buttonGhost}
-            onClick={() => navigate(`/admin/individuals/detail/${speciesId}/${id}`)}
-          >
-            詳細へ戻る
-          </button>
+          <div className={adminStyles.inlineActions}>
+            <button
+              className={adminStyles.buttonGhost}
+              type="button"
+              onClick={() => navigate(`/admin/individuals/detail/${speciesId}/${id}`)}
+            >
+              詳細へ戻る
+            </button>
+            <button className={adminStyles.button} type="submit" form={formId} disabled={isSaving}>
+              {isSaving ? '保存中...' : '保存する'}
+            </button>
+          </div>
         }
       />
 
-      <form className={adminStyles.stack} onSubmit={handleSubmit}>
+      <form id={formId} className={adminStyles.stack} onSubmit={handleSubmit}>
+
         <IndividualImageManager
           images={imagesQuery.data ?? []}
           loading={imagesQuery.isLoading}
@@ -153,8 +155,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
 
         <ImageUploadPicker files={newFiles} previews={newPreviews} primaryIndex={0} onFilesChange={setNewFiles} />
 
-        <div className={adminStyles.panel}>
-          <h2>個体情報</h2>
+        <div className={adminStyles.sectionPlain}>
           <IndividualFormFields
             mode="edit"
             form={form}
@@ -162,12 +163,6 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
             pairingList={pairingsQuery.data}
           />
         </div>
-
-        <FormActions>
-          <button className={adminStyles.button} type="submit" disabled={isSaving}>
-            {isSaving ? '保存中...' : '保存する'}
-          </button>
-        </FormActions>
       </form>
 
       {errorMessage ? <StatusBanner tone="error">{errorMessage}</StatusBanner> : null}

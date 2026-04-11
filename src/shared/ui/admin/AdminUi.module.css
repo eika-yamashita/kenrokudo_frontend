@@ -10,12 +10,24 @@
   margin-bottom: 24px;
 }
 
+.headerSticky {
+  position: sticky;
+  top: 74px;
+  z-index: 8;
+  padding: 8px 0;
+  background: rgba(245, 245, 243, 0.96);
+}
+
 .headerTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.headerTopActionsOnly {
+  justify-content: flex-end;
 }
 
 .header h1,
@@ -43,6 +55,18 @@
 
 .toolbar {
   margin-bottom: 20px;
+}
+
+.formActionsStickyTop {
+  position: sticky;
+  top: 74px;
+  z-index: 7;
+  padding: 10px 12px;
+  margin: 0 0 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: rgba(252, 252, 251, 0.96);
+  backdrop-filter: blur(6px);
 }
 
 .button,
@@ -234,6 +258,18 @@
 }
 
 .panel h2 {
+  margin: 0 0 14px;
+  font-size: 0.98rem;
+}
+
+.sectionPlain {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.sectionPlain h2 {
   margin: 0 0 14px;
   font-size: 0.98rem;
 }
@@ -548,5 +584,15 @@
   .imageThumbButton {
     width: 64px;
     height: 64px;
+  }
+
+  .headerSticky {
+    top: 0;
+    padding: 8px 0;
+  }
+
+  .formActionsStickyTop {
+    top: 8px;
+    padding: 8px 10px;
   }
 }

@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
   AdminPageLayout,
-  FormActions,
   PageHeader,
   StatusBanner,
   adminStyles,
@@ -18,12 +17,14 @@ import {
   formValuesToIndividual,
 } from '../forms/individualFormMapper';
 import { individualFormSchema, type IndividualFormValues } from '../forms/individualFormSchema';
+import { getSpeciesLabel } from '../../species/utils/getSpeciesLabel';
 import {
   useCreateIndividualMutation,
   useUploadIndividualImageMutation,
 } from '../hooks/useIndividualQueries';
 
 export const IndividualCreateScreen = () => {
+  const formId = 'individual-create-form';
   const navigate = useNavigate();
   const speciesQuery = useSpeciesQuery();
   const pairingsQuery = usePairingsQuery();
@@ -63,6 +64,8 @@ export const IndividualCreateScreen = () => {
   const isSaving = createMutation.isPending || uploadImageMutation.isPending;
   const isLoading = speciesQuery.isLoading || pairingsQuery.isLoading;
   const pairings = useMemo(() => pairingsQuery.data ?? [], [pairingsQuery.data]);
+  const selectedSpeciesId = form.watch('species_id');
+  const speciesLabel = selectedSpeciesId ? getSpeciesLabel(selectedSpeciesId, speciesQuery.data ?? []) : '-';
 
   const handleSubmit = form.handleSubmit(async (values) => {
     const created = await createMutation.mutateAsync(formValuesToIndividual(values));
@@ -92,15 +95,22 @@ export const IndividualCreateScreen = () => {
   return (
     <AdminPageLayout>
       <PageHeader
-        title="個体新規登録"
+        title={` ${speciesLabel} / 新規登録`}
+        stickyActions
         actions={
-          <button className={adminStyles.buttonGhost} onClick={() => navigate('/admin/individuals')}>
-            一覧へ戻る
-          </button>
+          <div className={adminStyles.inlineActions}>
+            <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate('/admin/individuals')}>
+              一覧へ戻る
+            </button>
+            <button className={adminStyles.button} type="submit" form={formId} disabled={isSaving}>
+              {isSaving ? '登録中...' : '登録する'}
+            </button>
+          </div>
         }
       />
 
-      <form className={adminStyles.stack} onSubmit={handleSubmit}>
+      <form id={formId} className={adminStyles.stack} onSubmit={handleSubmit}>
+
         <ImageUploadPicker
           files={imageFiles}
           previews={imagePreviews}
@@ -112,16 +122,9 @@ export const IndividualCreateScreen = () => {
           onPrimaryIndexChange={setPrimaryImageIndex}
         />
 
-        <div className={adminStyles.panel}>
-          <h2>個体情報</h2>
+        <div className={adminStyles.sectionPlain}>
           <IndividualFormFields mode="create" form={form} speciesList={speciesQuery.data} pairingList={pairings} />
         </div>
-
-        <FormActions>
-          <button className={adminStyles.button} type="submit" disabled={isSaving}>
-            {isSaving ? '登録中...' : '登録する'}
-          </button>
-        </FormActions>
       </form>
 
       {errorMessage ? <StatusBanner tone="error">{errorMessage}</StatusBanner> : null}

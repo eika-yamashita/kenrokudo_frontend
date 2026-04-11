@@ -115,18 +115,14 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
   return (
     <AdminPageLayout>
       <PageHeader
-        title="個体詳細"
-        description={
-          <p>
-            種: <strong>{speciesLabel}</strong> / 個体ID: <strong>{individual.id}</strong>
-          </p>
-        }
+        title={`${speciesLabel} / ${individual.id}`}
+        stickyActions
         actions={
           <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.button} onClick={() => navigate(`/admin/individuals/edit/${speciesId}/${id}`)}>
+            <button className={adminStyles.button} type="button" onClick={() => navigate(`/admin/individuals/edit/${speciesId}/${id}`)}>
               編集する
             </button>
-            <button className={adminStyles.buttonGhost} onClick={() => navigate('/admin/individuals')}>
+            <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate('/admin/individuals')}>
               一覧へ戻る
             </button>
           </div>
@@ -179,7 +175,6 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
         </div>
 
         <div className={adminStyles.panel}>
-          <h2>個体情報</h2>
           <dl className={adminStyles.detailGrid}>
             {fieldRows.map(([label, key]) => (
               <div key={key} className={adminStyles.detailItem}>
