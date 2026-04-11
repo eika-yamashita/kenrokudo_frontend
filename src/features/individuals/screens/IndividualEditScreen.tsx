@@ -86,9 +86,19 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
     replaceImageMutation.isPending ||
     deleteImageMutation.isPending ||
     setPrimaryMutation.isPending;
+  const confirmSave = () => {
+    if (typeof window === 'undefined' || typeof window.confirm !== 'function') return true;
+
+    try {
+      return window.confirm('保存してよろしいですか？');
+    } catch {
+      return true;
+    }
+  };
 
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!individualQuery.data) return;
+    if (!confirmSave()) return;
 
     await updateMutation.mutateAsync({
       speciesId,

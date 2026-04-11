@@ -66,8 +66,19 @@ export const IndividualCreateScreen = () => {
   const pairings = useMemo(() => pairingsQuery.data ?? [], [pairingsQuery.data]);
   const selectedSpeciesId = form.watch('species_id');
   const speciesLabel = selectedSpeciesId ? getSpeciesLabel(selectedSpeciesId, speciesQuery.data ?? []) : '-';
+  const confirmCreate = () => {
+    if (typeof window === 'undefined' || typeof window.confirm !== 'function') return true;
+
+    try {
+      return window.confirm('登録してよろしいですか？');
+    } catch {
+      return true;
+    }
+  };
 
   const handleSubmit = form.handleSubmit(async (values) => {
+    if (!confirmCreate()) return;
+
     const created = await createMutation.mutateAsync(formValuesToIndividual(values));
 
     if (imageFiles.length > 0) {

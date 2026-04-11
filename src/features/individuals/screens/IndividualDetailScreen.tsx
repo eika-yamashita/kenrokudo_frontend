@@ -119,11 +119,11 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
         stickyActions
         actions={
           <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.button} type="button" onClick={() => navigate(`/admin/individuals/edit/${speciesId}/${id}`)}>
-              編集する
-            </button>
             <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate('/admin/individuals')}>
               一覧へ戻る
+            </button>
+            <button className={adminStyles.button} type="button" onClick={() => navigate(`/admin/individuals/edit/${speciesId}/${id}`)}>
+              編集する
             </button>
           </div>
         }
@@ -174,7 +174,7 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
           )}
         </div>
 
-        <div className={adminStyles.panel}>
+        <div className={adminStyles.sectionPlain}>
           <dl className={adminStyles.detailGrid}>
             {fieldRows.map(([label, key]) => (
               <div key={key} className={adminStyles.detailItem}>

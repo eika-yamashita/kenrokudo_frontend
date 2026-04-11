@@ -211,18 +211,30 @@
   color: var(--text-main);
   font-size: 0.88rem;
   font-weight: 600;
+  min-width: 0;
 }
 
 .field input,
 .field select,
 .field textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--line-hard);
   border-radius: 8px;
   background: #ffffff;
   padding: 10px 12px;
   font: inherit;
   color: var(--text-main);
+}
+
+.field input,
+.field select {
+  height: 42px;
+}
+
+.field input[type='date'] {
+  inline-size: 100%;
 }
 
 .field input::placeholder,
@@ -539,7 +551,8 @@
 .thumbPlaceholder {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-left: 8px;
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 700;
