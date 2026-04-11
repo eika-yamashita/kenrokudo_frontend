@@ -1,14 +1,14 @@
 ﻿body {
   margin: 0;
-  font-family: 'Manrope', 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  font-family: 'Instrument Sans', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #ffffff;
-  color: #1f1710;
+  background: var(--page-bg);
+  color: var(--text-main);
 }
 
 code {
-  font-family: 'Cascadia Code', Consolas, monospace;
+  font-family: 'IBM Plex Mono', 'Cascadia Code', Consolas, monospace;
 }
 
 * {
@@ -25,8 +25,7 @@ img {
 
 input:focus,
 textarea:focus {
-  outline: 2px solid rgba(140, 100, 55, 0.16);
-  border-color: #0b0600;
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
 }
-
-

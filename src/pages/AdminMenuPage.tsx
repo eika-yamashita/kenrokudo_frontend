@@ -1,18 +1,23 @@
 import { useNavigate } from 'react-router-dom';
+import { AdminPageLayout, PageHeader, adminStyles } from '../shared/ui/admin';
 
 export const AdminMenuPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="admin-page">
-      <div className="admin-menu-grid">
-        <button className="primary-button admin-menu-button" onClick={() => navigate('/admin/individuals')}>
-          個体管理
+    <AdminPageLayout>
+      <PageHeader
+        title="管理メニュー"
+        description={<p>個体管理とペアリング管理の入口をここにまとめています。</p>}
+      />
+      <div className={adminStyles.formGrid}>
+        <button className={adminStyles.button} onClick={() => navigate('/admin/individuals')}>
+          個体一覧へ
         </button>
-        <button className="primary-button admin-menu-button" onClick={() => navigate('/admin/pairings')}>
-          ペアリング管理
+        <button className={adminStyles.button} onClick={() => navigate('/admin/pairings')}>
+          ペアリング一覧へ
         </button>
       </div>
-    </div>
+    </AdminPageLayout>
   );
 };

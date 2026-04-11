@@ -1,0 +1,110 @@
+.appShell {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #f8f8f7 0%, #f5f5f3 100%);
+  color: var(--text-main);
+  font-family: 'Instrument Sans', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+}
+
+.appHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 14px 24px;
+  background: rgba(248, 248, 247, 0.88);
+  border-bottom: 1px solid var(--line-soft);
+  backdrop-filter: blur(10px);
+}
+
+.appHeaderHome {
+  background: #000000;
+  border-bottom-color: #1f1f1f;
+  backdrop-filter: none;
+}
+
+.appHeaderAdmin {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.brandLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: clamp(1rem, 1.2vw, 1.08rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.brandLink::before {
+  content: none;
+}
+
+.brandLinkHome {
+  color: #ffffff;
+  font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'BIZ UDPMincho', 'MS PMincho', serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.brandLinkHome:visited {
+  color: #ffffff;
+}
+
+.brandLinkAdmin::after {
+  content: 'Admin';
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--line-hard);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.appMain {
+  flex: 1;
+  width: min(1120px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 24px 0 64px;
+  animation: appLoad 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.appMainHome {
+  padding-top: 0;
+}
+
+@keyframes appLoad {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .appHeader {
+    padding: 14px 16px;
+    position: static;
+    backdrop-filter: none;
+  }
+
+  .appMain {
+    width: min(100% - 14px, 1120px);
+    padding: 20px 0 40px;
+  }
+
+  .appMainHome {
+    padding-top: 0;
+  }
+}

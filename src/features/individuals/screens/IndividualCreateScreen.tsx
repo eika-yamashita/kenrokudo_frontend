@@ -1,0 +1,130 @@
+import { useEffect, useMemo, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import {
+  AdminPageLayout,
+  FormActions,
+  PageHeader,
+  StatusBanner,
+  adminStyles,
+} from '../../../shared/ui/admin';
+import { usePairingsQuery } from '../../pairings/hooks/usePairingQueries';
+import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
+import { ImageUploadPicker } from '../components/ImageUploadPicker';
+import { IndividualFormFields } from '../components/IndividualFormFields';
+import {
+  createEmptyIndividualFormValues,
+  formValuesToIndividual,
+} from '../forms/individualFormMapper';
+import { individualFormSchema, type IndividualFormValues } from '../forms/individualFormSchema';
+import {
+  useCreateIndividualMutation,
+  useUploadIndividualImageMutation,
+} from '../hooks/useIndividualQueries';
+
+export const IndividualCreateScreen = () => {
+  const navigate = useNavigate();
+  const speciesQuery = useSpeciesQuery();
+  const pairingsQuery = usePairingsQuery();
+  const createMutation = useCreateIndividualMutation();
+  const uploadImageMutation = useUploadIndividualImageMutation();
+
+  const form = useForm<IndividualFormValues>({
+    resolver: zodResolver(individualFormSchema),
+    defaultValues: createEmptyIndividualFormValues(),
+  });
+
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (speciesQuery.data?.[0] && !form.getValues('species_id')) {
+      form.setValue('species_id', speciesQuery.data[0].species_id);
+    }
+  }, [form, speciesQuery.data]);
+
+  useEffect(() => {
+    const previewUrls = imageFiles.map((file) => URL.createObjectURL(file));
+    setImagePreviews(previewUrls);
+
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imageFiles]);
+
+  const errorMessage =
+    speciesQuery.error?.message ||
+    pairingsQuery.error?.message ||
+    createMutation.error?.message ||
+    uploadImageMutation.error?.message;
+
+  const isSaving = createMutation.isPending || uploadImageMutation.isPending;
+  const isLoading = speciesQuery.isLoading || pairingsQuery.isLoading;
+  const pairings = useMemo(() => pairingsQuery.data ?? [], [pairingsQuery.data]);
+
+  const handleSubmit = form.handleSubmit(async (values) => {
+    const created = await createMutation.mutateAsync(formValuesToIndividual(values));
+
+    if (imageFiles.length > 0) {
+      for (let index = 0; index < imageFiles.length; index += 1) {
+        await uploadImageMutation.mutateAsync({
+          speciesId: created.species_id,
+          id: created.id,
+          file: imageFiles[index],
+          isPrimary: index === primaryImageIndex,
+        });
+      }
+    }
+
+    navigate('/admin/individuals');
+  });
+
+  if (isLoading) {
+    return <StatusBanner>読み込み中...</StatusBanner>;
+  }
+
+  if (!speciesQuery.data) {
+    return <StatusBanner tone="error">種マスタを読み込めませんでした</StatusBanner>;
+  }
+
+  return (
+    <AdminPageLayout>
+      <PageHeader
+        title="個体新規登録"
+        actions={
+          <button className={adminStyles.buttonGhost} onClick={() => navigate('/admin/individuals')}>
+            一覧へ戻る
+          </button>
+        }
+      />
+
+      <form className={adminStyles.stack} onSubmit={handleSubmit}>
+        <ImageUploadPicker
+          files={imageFiles}
+          previews={imagePreviews}
+          primaryIndex={primaryImageIndex}
+          onFilesChange={(files) => {
+            setImageFiles(files);
+            setPrimaryImageIndex(0);
+          }}
+          onPrimaryIndexChange={setPrimaryImageIndex}
+        />
+
+        <div className={adminStyles.panel}>
+          <h2>個体情報</h2>
+          <IndividualFormFields mode="create" form={form} speciesList={speciesQuery.data} pairingList={pairings} />
+        </div>
+
+        <FormActions>
+          <button className={adminStyles.button} type="submit" disabled={isSaving}>
+            {isSaving ? '登録中...' : '登録する'}
+          </button>
+        </FormActions>
+      </form>
+
+      {errorMessage ? <StatusBanner tone="error">{errorMessage}</StatusBanner> : null}
+    </AdminPageLayout>
+  );
+};
