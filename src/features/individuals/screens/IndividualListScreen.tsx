@@ -38,9 +38,6 @@ export const IndividualListScreen = () => {
         title="個体一覧"
         actions={
           <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.buttonGhost} onClick={() => navigate('/admin')}>
-              管理メニューへ戻る
-            </button>
             <button className={adminStyles.button} onClick={() => navigate('/admin/individuals/new')}>
               新規登録
             </button>

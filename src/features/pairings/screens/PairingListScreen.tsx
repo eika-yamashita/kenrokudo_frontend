@@ -36,9 +36,6 @@ export const PairingListScreen = () => {
         title="ペアリング一覧"
         actions={
           <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.buttonGhost} onClick={() => navigate('/admin')}>
-              管理メニューへ戻る
-            </button>
             <button className={adminStyles.button} onClick={() => navigate('/admin/pairings/new')}>
               新規登録
             </button>
