@@ -68,15 +68,21 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
   const selectedImageIndex = selectedImage ? images.findIndex((image) => image.image_id === selectedImage.image_id) : -1;
   const listSearch = location.search;
   const showPurchaseDetails = individual.breeding_category === '1';
+  const showBreedingDetails = individual.breeding_category === '0';
   const showSalesTo = individual.sales_category === '2';
   const showSalesPricing = individual.sales_category === '1' || individual.sales_category === '2';
   const fieldRows = [
-    ['オス親ID', 'male_parent_id'],
-    ['メス親ID', 'female_parent_id'],
+    ['繁殖区分', 'breeding_category'],
+    ...(showBreedingDetails ? ([['ペアリングID', 'pairing_key']] as const) : []),
+    ...(showBreedingDetails
+      ? ([
+          ['オス親ID', 'male_parent_id'],
+          ['メス親ID', 'female_parent_id'],
+        ] as const)
+      : []),
     ['モルフ', 'morph'],
     ['血統', 'bloodline'],
     ['性別', 'gender_category'],
-    ['繁殖区分', 'breeding_category'],
     ['ブリーダー', 'breeder'],
     ['ハッチ日', 'hatch_date'],
     ['クラッチ日', 'clutch_date'],
@@ -110,6 +116,12 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
 
     const value = String(raw);
     if (key === 'species_id') return speciesLabel;
+    if (key === 'pairing_key') {
+      if (!individual.pairing_fiscal_year || !individual.pairing_id) {
+        return '-';
+      }
+      return `${individual.pairing_fiscal_year} / ${individual.pairing_id}`;
+    }
     if (key === 'gender_category') return formatGenderCategory(value);
     if (key === 'breeding_category') return value === '1' ? '購入個体' : '自家繁殖';
     if (key === 'sales_category') {
@@ -215,7 +227,7 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
             {fieldRows.map(([label, key]) => (
               <div key={key} className={adminStyles.detailItem}>
                 <dt>{label}</dt>
-                <dd>{renderValue(key, individual[key])}</dd>
+                <dd>{renderValue(key, key === 'pairing_key' ? undefined : individual[key])}</dd>
               </div>
             ))}
           </dl>

@@ -16,7 +16,9 @@ function AppContent() {
   const isHomeRoute = location.pathname === '/';
   const headerClassName = `appHeader ${isAdminRoute ? 'appHeaderAdmin' : 'appHeaderHome'}`;
   const brandLinkClassName = `brandLink ${isAdminRoute ? 'brandLinkAdmin' : 'brandLinkHome'}`;
-  const mainClassName = `appMain ${isHomeRoute ? 'appMainHome' : ''}`;
+  const mainClassName = ['appMain', isHomeRoute ? 'appMainHome' : '', isAdminRoute ? 'appMainAdmin' : '']
+    .filter(Boolean)
+    .join(' ');
   const brandLinkTo = isAdminRoute ? '/admin' : '/';
 
   return (

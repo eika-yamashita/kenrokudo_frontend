@@ -74,7 +74,7 @@ describe('IndividualCreateScreen', () => {
     const file = new File(['binary'], 'gecko.png', { type: 'image/png' });
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     await userEvent.upload(fileInput, file);
-    await userEvent.click(screen.getByRole('button', { name: '登録する' }));
+    await userEvent.click(screen.getByRole('button', { name: '登録' }));
 
     await waitFor(() => expect(mockCreateMutation).toHaveBeenCalled());
     expect(mockUploadMutation).toHaveBeenCalledWith({

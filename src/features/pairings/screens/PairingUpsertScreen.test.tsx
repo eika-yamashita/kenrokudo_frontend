@@ -66,7 +66,7 @@ describe('PairingUpsertScreen', () => {
     await userEvent.type(screen.getByLabelText('メス親ID'), 'F1');
     await userEvent.clear(screen.getByLabelText('ペアリング日'));
     await userEvent.type(screen.getByLabelText('ペアリング日'), '2026-04-08');
-    await userEvent.click(screen.getByRole('button', { name: '保存する' }));
+    await userEvent.click(screen.getByRole('button', { name: '保存' }));
 
     await waitFor(() => expect(mockCreateMutation).toHaveBeenCalled());
     expect(mockCreateMutation).toHaveBeenCalledWith(

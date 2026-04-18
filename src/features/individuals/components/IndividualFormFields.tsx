@@ -42,6 +42,7 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
       : '';
   const pairingSelected = Boolean(selectedPairingKey);
   const isPurchaseIndividual = breedingCategory === '1';
+  const isSelfBreeding = breedingCategory === '0';
   const showSalesTo = salesCategory === '2';
   const showSalesPricing = salesCategory === '1' || salesCategory === '2';
 
@@ -104,7 +105,62 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
             </select>
             {errors.species_id ? <p className={adminStyles.fieldError}>{errors.species_id.message}</p> : null}
           </label>
+        </>
+      ) : (
+        <>
+          <input type="hidden" {...register('species_id')} />
+          <input type="hidden" {...register('id')} />
+        </>
+      )}
 
+      <label className={adminStyles.field}>
+        繁殖区分
+        <select
+          {...register('breeding_category')}
+          onChange={(event) => {
+            const value = event.target.value;
+            setValue('breeding_category', value, { shouldDirty: true, shouldValidate: true });
+            if (value === '1') {
+              setValue('pairing_fiscal_year', '', { shouldDirty: true });
+              setValue('pairing_id', '', { shouldDirty: true });
+              setValue('male_parent_id', '', { shouldDirty: true });
+              setValue('female_parent_id', '', { shouldDirty: true });
+              setValue('breeder', '', { shouldDirty: true });
+              return;
+            }
+
+            setValue('breeder', '絢禄堂', { shouldDirty: true });
+            setValue('purchase_from', '', { shouldDirty: true });
+            setValue('purchase_price', '', { shouldDirty: true });
+            setValue('purchase_date', '', { shouldDirty: true });
+          }}
+        >
+          {breedingCategoryOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {errors.breeding_category ? (
+          <p className={adminStyles.fieldError}>{errors.breeding_category.message}</p>
+        ) : null}
+      </label>
+
+      {mode === 'create' ? (
+        <label className={adminStyles.field}>
+          個体ID
+          <input
+            {...register('id')}
+            onBlur={(event) =>
+              setValue('id', normalizeIdInput(event.target.value), { shouldDirty: true, shouldValidate: true })
+            }
+          />
+          {errors.id ? <p className={adminStyles.fieldError}>{errors.id.message}</p> : null}
+        </label>
+      ) : null}
+
+      {isSelfBreeding ? (
+        <>
           <label className={adminStyles.field}>
             ペアリングID
             <select value={selectedPairingKey} onChange={(event) => handlePairingChange(event.target.value)}>
@@ -122,54 +178,36 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
               <p className={adminStyles.fieldError}>{errors.pairing_fiscal_year.message}</p>
             ) : null}
           </label>
-        </>
-      ) : (
-        <>
-          <input type="hidden" {...register('species_id')} />
-          <input type="hidden" {...register('id')} />
-        </>
-      )}
 
-      {mode === 'create' ? (
-        <label className={adminStyles.field}>
-          個体ID
-          <input
-            {...register('id')}
-            onBlur={(event) =>
-              setValue('id', normalizeIdInput(event.target.value), { shouldDirty: true, shouldValidate: true })
-            }
-          />
-          {errors.id ? <p className={adminStyles.fieldError}>{errors.id.message}</p> : null}
-        </label>
+          <label className={adminStyles.field}>
+            オス親ID
+            <input
+              {...register('male_parent_id')}
+              disabled={pairingSelected}
+              onBlur={(event) =>
+                setValue('male_parent_id', normalizeIdInput(event.target.value), {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+            />
+          </label>
+
+          <label className={adminStyles.field}>
+            メス親ID
+            <input
+              {...register('female_parent_id')}
+              disabled={pairingSelected}
+              onBlur={(event) =>
+                setValue('female_parent_id', normalizeIdInput(event.target.value), {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+            />
+          </label>
+        </>
       ) : null}
-
-      <label className={adminStyles.field}>
-        オス親ID
-        <input
-          {...register('male_parent_id')}
-          disabled={pairingSelected}
-          onBlur={(event) =>
-            setValue('male_parent_id', normalizeIdInput(event.target.value), {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-        />
-      </label>
-
-      <label className={adminStyles.field}>
-        メス親ID
-        <input
-          {...register('female_parent_id')}
-          disabled={pairingSelected}
-          onBlur={(event) =>
-            setValue('female_parent_id', normalizeIdInput(event.target.value), {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-        />
-      </label>
 
       <label className={adminStyles.field}>
         モルフ
@@ -190,35 +228,6 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
             </option>
           ))}
         </select>
-      </label>
-
-      <label className={adminStyles.field}>
-        繁殖区分
-        <select
-          {...register('breeding_category')}
-          onChange={(event) => {
-            const value = event.target.value;
-            setValue('breeding_category', value, { shouldDirty: true, shouldValidate: true });
-            if (value === '1') {
-              setValue('breeder', '', { shouldDirty: true });
-              return;
-            }
-
-            setValue('breeder', '絢禄堂', { shouldDirty: true });
-            setValue('purchase_from', '', { shouldDirty: true });
-            setValue('purchase_price', '', { shouldDirty: true });
-            setValue('purchase_date', '', { shouldDirty: true });
-          }}
-        >
-          {breedingCategoryOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        {errors.breeding_category ? (
-          <p className={adminStyles.fieldError}>{errors.breeding_category.message}</p>
-        ) : null}
       </label>
 
       <label className={adminStyles.field}>
