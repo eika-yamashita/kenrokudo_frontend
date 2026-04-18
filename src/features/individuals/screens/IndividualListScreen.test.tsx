@@ -2,9 +2,13 @@ import { render, screen, within } from '@testing-library/react';
 import { IndividualListScreen } from './IndividualListScreen';
 
 const mockNavigate = jest.fn();
+const mockSetSearchParams = jest.fn();
+const mockSearchParams = new URLSearchParams('speciesId=leo&fiscalYear=2026');
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ search: '?speciesId=leo&fiscalYear=2026' }),
+  useSearchParams: () => [mockSearchParams, mockSetSearchParams],
 }), { virtual: true });
 
 jest.mock('../../species/hooks/useSpeciesQuery', () => ({
@@ -37,13 +41,18 @@ jest.mock('../components/IndividualThumbnailCell', () => ({
 }));
 
 describe('IndividualListScreen', () => {
-  it('renders cached species labels in the list', () => {
+  it('does not render a species column in the list', () => {
+    mockNavigate.mockReset();
+    mockSetSearchParams.mockReset();
+
     render(
       <IndividualListScreen />
     );
 
     const table = screen.getByRole('table');
-    expect(within(table).getByText('Leopard Gecko')).toBeInTheDocument();
+    expect(within(table).queryByText('種名')).not.toBeInTheDocument();
+    expect(within(table).queryByText('Leopard Gecko')).not.toBeInTheDocument();
+    expect(within(table).getByText('個体ID')).toBeInTheDocument();
     expect(within(table).getByText('Mack Snow')).toBeInTheDocument();
   });
 });

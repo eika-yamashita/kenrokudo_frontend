@@ -1,223 +1,19 @@
-/*
-import { useMemo, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import type { Individual } from '../../../api/models/Individual';
-import {
-  AdminPageLayout,
-  DataTable,
-  PageHeader,
-  StatusBanner,
-  adminStyles,
-} from '../../../shared/ui/admin';
-import { formatGenderCategory } from '../../../utils/genderCategory';
-import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
-import { createSpeciesLabelMap } from '../../species/utils/getSpeciesLabel';
-import { IndividualThumbnailCell } from '../components/IndividualThumbnailCell';
-import { useIndividualsQuery } from '../hooks/useIndividualQueries';
-
-type ListFilters = {
-  speciesId: string;
-  fiscalYear: string;
-  keyword: string;
-};
-
-const createDefaultFilters = (): ListFilters => ({
-  speciesId: '',
-  fiscalYear: '',
-  keyword: '',
-});
-
-export const IndividualListScreen = () => {
-  const navigate = useNavigate();
-  const individualsQuery = useIndividualsQuery();
-  const speciesQuery = useSpeciesQuery();
-  const [draftFilters, setDraftFilters] = useState<ListFilters>(createDefaultFilters);
-  const [appliedFilters, setAppliedFilters] = useState<ListFilters>(createDefaultFilters);
-  const speciesLabelMap = useMemo(() => createSpeciesLabelMap(speciesQuery.data ?? []), [speciesQuery.data]);
-  const yearOptions = useMemo(() => {
-    const years = new Set<number>();
-    for (const individual of individualsQuery.data ?? []) {
-      if (individual.pairing_fiscal_year !== undefined && individual.pairing_fiscal_year !== null) {
-        years.add(individual.pairing_fiscal_year);
-      }
-    }
-    return Array.from(years).sort((a, b) => b - a);
-  }, [individualsQuery.data]);
-  const filteredIndividuals = useMemo(() => {
-    const keyword = appliedFilters.keyword.trim().toLowerCase();
-
-    return (individualsQuery.data ?? []).filter((individual) => {
-      const matchesSpecies = !appliedFilters.speciesId || individual.species_id === appliedFilters.speciesId;
-      const matchesYear =
-        !appliedFilters.fiscalYear || String(individual.pairing_fiscal_year ?? '') === appliedFilters.fiscalYear;
-      const matchesKeyword =
-        !keyword ||
-        [
-          individual.id,
-          individual.morph,
-          individual.bloodline,
-          individual.male_parent_id,
-          individual.female_parent_id,
-          individual.note,
-        ].some((value) => String(value ?? '').toLowerCase().includes(keyword));
-
-      return matchesSpecies && matchesYear && matchesKeyword;
-    });
-  }, [appliedFilters, individualsQuery.data]);
-
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setAppliedFilters({
-      speciesId: draftFilters.speciesId,
-      fiscalYear: draftFilters.fiscalYear,
-      keyword: draftFilters.keyword.trim(),
-    });
-  };
-
-  const handleSearchClear = () => {
-    const cleared = createDefaultFilters();
-    setDraftFilters(cleared);
-    setAppliedFilters(cleared);
-  };
-
-  if (individualsQuery.isLoading || speciesQuery.isLoading) {
-    return <StatusBanner>読み込み中...</StatusBanner>;
-  }
-
-  if (individualsQuery.error) {
-    return <StatusBanner tone="error">{individualsQuery.error.message}</StatusBanner>;
-  }
-
-  if (speciesQuery.error) {
-    return <StatusBanner tone="error">{speciesQuery.error.message}</StatusBanner>;
-  }
-
-  return (
-    <AdminPageLayout>
-      <PageHeader
-        title="個体一覧"
-        actions={
-          <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.button} onClick={() => navigate('/admin/individuals/new')}>
-              新規登録
-            </button>
-          </div>
-        }
-      />
-
-      <form className={adminStyles.searchForm} onSubmit={handleSearchSubmit}>
-        <label className={adminStyles.field}>
-          種
-          <select
-            value={draftFilters.speciesId}
-            onChange={(event) => {
-              setDraftFilters((prev) => ({ ...prev, speciesId: event.target.value }));
-            }}
-          >
-            <option value="">すべて</option>
-            {(speciesQuery.data ?? []).map((species) => (
-              <option key={species.species_id} value={species.species_id}>
-                {species.common_name || species.japanese_name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className={adminStyles.field}>
-          年度
-          <select
-            value={draftFilters.fiscalYear}
-            onChange={(event) => {
-              setDraftFilters((prev) => ({ ...prev, fiscalYear: event.target.value }));
-            }}
-          >
-            <option value="">すべて</option>
-            {yearOptions.map((year) => (
-              <option key={year} value={String(year)}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className={adminStyles.field}>
-          フリーワード
-          <input
-            value={draftFilters.keyword}
-            placeholder="個体ID・モルフ・メモ など"
-            onChange={(event) => {
-              setDraftFilters((prev) => ({ ...prev, keyword: event.target.value }));
-            }}
-          />
-        </label>
-
-        <div className={adminStyles.searchActions}>
-          <button className={adminStyles.button} type="submit">
-            検索
-          </button>
-          <button className={adminStyles.buttonGhost} type="button" onClick={handleSearchClear}>
-            クリア
-          </button>
-        </div>
-      </form>
-
-      <DataTable<Individual>
-        columns={[
-          {
-            key: 'image',
-            header: '画像',
-            renderCell: (individual) => (
-              <IndividualThumbnailCell speciesId={individual.species_id} id={individual.id} density="compact" />
-            ),
-          },
-          {
-            key: 'species',
-            header: '種名',
-            renderCell: (individual) => speciesLabelMap[individual.species_id] ?? individual.species_id,
-          },
-          { key: 'id', header: '個体ID', renderCell: (individual) => individual.id },
-          { key: 'morph', header: 'モルフ', renderCell: (individual) => individual.morph ?? '-' },
-          {
-            key: 'gender',
-            header: '雌雄区分',
-            renderCell: (individual) => formatGenderCategory(individual.gender_category),
-          },
-        ]}
-        rows={filteredIndividuals}
-        emptyMessage="個体情報はまだありません"
-        getRowKey={(individual) => `${individual.species_id}-${individual.id}`}
-        onRowClick={(individual) => navigate(`/admin/individuals/detail/${individual.species_id}/${individual.id}`)}
-        density="compact"
-      />
-    </AdminPageLayout>
-  );
-};
-*/
-
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+﻿import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Individual } from '../../../api/models/Individual';
 import { AdminPageLayout, DataTable, PageHeader, StatusBanner, adminStyles } from '../../../shared/ui/admin';
+import {
+  createSearchString,
+  parseBooleanFlagParam,
+  parsePositiveIntegerParam,
+} from '../../../shared/utils/searchParams';
 import { formatGenderCategory } from '../../../utils/genderCategory';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
-import { createSpeciesLabelMap } from '../../species/utils/getSpeciesLabel';
 import { IndividualThumbnailCell } from '../components/IndividualThumbnailCell';
 import { useIndividualSearchQuery } from '../hooks/useIndividualQueries';
 
 const DEFAULT_SPECIES_ID = '0001';
 const DEFAULT_FISCAL_YEAR = new Date().getFullYear();
-
-type ListFilters = {
-  speciesId: string;
-  fiscalYear: number;
-  morph: string;
-};
-
-const createDefaultFilters = (): ListFilters => ({
-  speciesId: DEFAULT_SPECIES_ID,
-  fiscalYear: DEFAULT_FISCAL_YEAR,
-  morph: '',
-});
 
 const createYearOptions = (startYear: number, endYear: number) => {
   const from = Math.min(startYear, endYear);
@@ -225,51 +21,88 @@ const createYearOptions = (startYear: number, endYear: number) => {
   return Array.from({ length: to - from + 1 }, (_, index) => to - index);
 };
 
-export const IndividualListScreen = () => {
-  const navigate = useNavigate();
-  const speciesQuery = useSpeciesQuery();
-  const [draftFilters, setDraftFilters] = useState<ListFilters>(createDefaultFilters);
-  const [appliedFilters, setAppliedFilters] = useState<ListFilters>(createDefaultFilters);
-
-  const individualsQuery = useIndividualSearchQuery({
-    speciesId: appliedFilters.speciesId,
-    fiscalYear: appliedFilters.fiscalYear,
-    morph: appliedFilters.morph.trim() || undefined,
+const createListSearch = ({
+  speciesId,
+  fiscalYear,
+  morph,
+  detailOpen,
+}: {
+  speciesId: string;
+  fiscalYear: number;
+  morph?: string;
+  detailOpen?: boolean;
+}) =>
+  createSearchString({
+    speciesId,
+    fiscalYear,
+    morph: morph?.trim() || undefined,
+    detail: detailOpen ? true : undefined,
   });
 
-  const speciesLabelMap = useMemo(() => createSpeciesLabelMap(speciesQuery.data ?? []), [speciesQuery.data]);
+export const IndividualListScreen = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const speciesQuery = useSpeciesQuery();
+  const requestedSpeciesId = searchParams.get('speciesId')?.trim() ?? '';
+  const requestedFiscalYear = parsePositiveIntegerParam(searchParams.get('fiscalYear'), DEFAULT_FISCAL_YEAR);
+  const appliedMorph = searchParams.get('morph')?.trim() ?? '';
+  const requestedDetailOpen = parseBooleanFlagParam(searchParams.get('detail'));
+  const [draftMorph, setDraftMorph] = useState(appliedMorph);
+
+  const speciesList = speciesQuery.data ?? [];
+  const defaultSpeciesId =
+    speciesList.find((species) => species.species_id === DEFAULT_SPECIES_ID)?.species_id ?? speciesList[0]?.species_id;
+  const matchedSpeciesId = speciesList.find((species) => species.species_id === requestedSpeciesId)?.species_id;
+  const effectiveSpeciesId = matchedSpeciesId || requestedSpeciesId || defaultSpeciesId || DEFAULT_SPECIES_ID;
+  const isDetailSearchOpen = requestedDetailOpen || appliedMorph.length > 0;
+
+  const individualsQuery = useIndividualSearchQuery({
+    speciesId: effectiveSpeciesId,
+    fiscalYear: requestedFiscalYear,
+    morph: appliedMorph || undefined,
+  });
+
   const yearOptions = useMemo(() => createYearOptions(2022, DEFAULT_FISCAL_YEAR), []);
+  const currentSearch = createListSearch({
+    speciesId: effectiveSpeciesId,
+    fiscalYear: requestedFiscalYear,
+    morph: appliedMorph,
+    detailOpen: isDetailSearchOpen,
+  });
 
   useEffect(() => {
-    const speciesList = speciesQuery.data ?? [];
-    if (speciesList.length === 0) {
+    setDraftMorph(appliedMorph);
+  }, [appliedMorph]);
+
+  useEffect(() => {
+    if (!speciesQuery.data || currentSearch === location.search) {
       return;
     }
 
-    const availableSpecies = new Set(speciesList.map((species) => species.species_id));
-    const nextSpeciesId = availableSpecies.has(DEFAULT_SPECIES_ID) ? DEFAULT_SPECIES_ID : speciesList[0].species_id;
-
-    setDraftFilters((previous) =>
-      previous.speciesId === nextSpeciesId ? previous : { ...previous, speciesId: nextSpeciesId }
-    );
-    setAppliedFilters((previous) =>
-      previous.speciesId === nextSpeciesId ? previous : { ...previous, speciesId: nextSpeciesId }
-    );
-  }, [speciesQuery.data]);
+    setSearchParams(currentSearch, { replace: true });
+  }, [currentSearch, location.search, setSearchParams, speciesQuery.data]);
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setAppliedFilters({
-      speciesId: draftFilters.speciesId,
-      fiscalYear: draftFilters.fiscalYear,
-      morph: draftFilters.morph.trim(),
-    });
+    setSearchParams(
+      createListSearch({
+        speciesId: effectiveSpeciesId,
+        fiscalYear: requestedFiscalYear,
+        morph: draftMorph,
+        detailOpen: true,
+      })
+    );
   };
 
   const handleSearchClear = () => {
-    const cleared = createDefaultFilters();
-    setDraftFilters(cleared);
-    setAppliedFilters(cleared);
+    setDraftMorph('');
+    setSearchParams(
+      createListSearch({
+        speciesId: effectiveSpeciesId,
+        fiscalYear: requestedFiscalYear,
+      })
+    );
   };
 
   if (individualsQuery.isLoading || speciesQuery.isLoading) {
@@ -290,36 +123,50 @@ export const IndividualListScreen = () => {
         title="個体一覧"
         actions={
           <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.button} onClick={() => navigate('/admin/individuals/new')}>
+            <button className={adminStyles.button} onClick={() => navigate(`/admin/individuals/new${currentSearch}`)}>
               新規登録
             </button>
           </div>
         }
       />
 
-      <form className={adminStyles.searchForm} onSubmit={handleSearchSubmit}>
-        <label className={adminStyles.field}>
-          種
+      <div className={adminStyles.searchToolbar}>
+        <div className={adminStyles.searchField}>
           <select
-            value={draftFilters.speciesId}
+            aria-label="種名"
+            value={effectiveSpeciesId}
             onChange={(event) => {
-              setDraftFilters((previous) => ({ ...previous, speciesId: event.target.value }));
+              setSearchParams(
+                createListSearch({
+                  speciesId: event.target.value,
+                  fiscalYear: requestedFiscalYear,
+                  morph: appliedMorph,
+                  detailOpen: isDetailSearchOpen,
+                })
+              );
             }}
           >
-            {(speciesQuery.data ?? []).map((species) => (
+            {speciesList.map((species) => (
               <option key={species.species_id} value={species.species_id}>
                 {species.common_name || species.japanese_name}
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label className={adminStyles.field}>
-          年度
+        <div className={adminStyles.searchField}>
           <select
-            value={String(draftFilters.fiscalYear)}
+            aria-label="年度"
+            value={String(requestedFiscalYear)}
             onChange={(event) => {
-              setDraftFilters((previous) => ({ ...previous, fiscalYear: Number(event.target.value) }));
+              setSearchParams(
+                createListSearch({
+                  speciesId: effectiveSpeciesId,
+                  fiscalYear: Number(event.target.value),
+                  morph: appliedMorph,
+                  detailOpen: isDetailSearchOpen,
+                })
+              );
             }}
           >
             {yearOptions.map((year) => (
@@ -328,28 +175,63 @@ export const IndividualListScreen = () => {
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label className={adminStyles.field}>
-          モルフ
-          <input
-            value={draftFilters.morph}
-            placeholder="モルフ名で検索"
-            onChange={(event) => {
-              setDraftFilters((previous) => ({ ...previous, morph: event.target.value }));
+        <div className={adminStyles.searchToolbarActions}>
+          <button
+            className={adminStyles.searchIconButton}
+            type="button"
+            aria-label={isDetailSearchOpen ? '詳細検索を閉じる' : '詳細検索を開く'}
+            title={isDetailSearchOpen ? '詳細検索を閉じる' : '詳細検索を開く'}
+            onClick={() => {
+              setSearchParams(
+                createListSearch({
+                  speciesId: effectiveSpeciesId,
+                  fiscalYear: requestedFiscalYear,
+                  morph: appliedMorph,
+                  detailOpen: !isDetailSearchOpen,
+                })
+              );
             }}
-          />
-        </label>
-
-        <div className={adminStyles.searchActions}>
-          <button className={adminStyles.button} type="submit">
-            検索
-          </button>
-          <button className={adminStyles.buttonGhost} type="button" onClick={handleSearchClear}>
-            クリア
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 6h16l-6 7v5l-4 2v-7L4 6Z"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
           </button>
         </div>
-      </form>
+      </div>
+
+      {isDetailSearchOpen ? (
+        <form className={adminStyles.searchDetailPanel} onSubmit={handleSearchSubmit}>
+          <label className={adminStyles.field}>
+            モルフ
+            <input
+              aria-label="モルフ"
+              value={draftMorph}
+              placeholder="モルフ名で検索"
+              onChange={(event) => {
+                setDraftMorph(event.target.value);
+              }}
+            />
+          </label>
+
+          <div className={adminStyles.searchActions}>
+            <button className={adminStyles.button} type="submit">
+              検索
+            </button>
+            <button className={adminStyles.buttonGhost} type="button" onClick={handleSearchClear}>
+              クリア
+            </button>
+          </div>
+        </form>
+      ) : null}
 
       <DataTable<Individual>
         columns={[
@@ -359,11 +241,6 @@ export const IndividualListScreen = () => {
             renderCell: (individual) => (
               <IndividualThumbnailCell speciesId={individual.species_id} id={individual.id} density="compact" />
             ),
-          },
-          {
-            key: 'species',
-            header: '種名',
-            renderCell: (individual) => speciesLabelMap[individual.species_id] ?? individual.species_id,
           },
           { key: 'id', header: '個体ID', renderCell: (individual) => individual.id },
           { key: 'morph', header: 'モルフ', renderCell: (individual) => individual.morph ?? '-' },
@@ -376,7 +253,9 @@ export const IndividualListScreen = () => {
         rows={individualsQuery.data ?? []}
         emptyMessage="個体情報はまだありません"
         getRowKey={(individual) => `${individual.species_id}-${individual.id}`}
-        onRowClick={(individual) => navigate(`/admin/individuals/detail/${individual.species_id}/${individual.id}`)}
+        onRowClick={(individual) =>
+          navigate(`/admin/individuals/detail/${individual.species_id}/${individual.id}${currentSearch}`)
+        }
         density="compact"
       />
     </AdminPageLayout>

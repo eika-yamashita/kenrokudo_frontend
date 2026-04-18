@@ -24,10 +24,11 @@ beforeEach(() => {
   __setMockPathname('/');
 });
 
-test('renders home page hero and admin entry point', () => {
+test('renders home page hero', () => {
   render(<App />);
   expect(screen.getByRole('heading', { name: /KENROKUDO/i })).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: /邂｡逅・Γ繝九Η繝ｼ縺ｸ/i })).toHaveAttribute('href', '/admin');
+  expect(screen.getByRole('img', { name: /Leopard gecko portrait/i })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /KENROKUDO/i })).toHaveAttribute('href', '/');
 });
 
 test('admin header title routes to admin top', () => {

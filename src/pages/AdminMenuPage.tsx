@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { AdminPageLayout, PageHeader, adminStyles } from '../shared/ui/admin';
 
 export const AdminMenuPage = () => {
@@ -7,15 +7,15 @@ export const AdminMenuPage = () => {
   return (
     <AdminPageLayout>
       <PageHeader
-        title="管理メニュー"
-        description={<p>個体管理とペアリング管理の入口をここにまとめています。</p>}
+        title=""
+        description=""
       />
-      <div className={adminStyles.formGrid}>
-        <button className={adminStyles.button} onClick={() => navigate('/admin/individuals')}>
-          個体一覧へ
+      <div className={adminStyles.menuCardGrid}>
+        <button className={adminStyles.menuCardButton} onClick={() => navigate('/admin/individuals')}>
+          個体管理
         </button>
-        <button className={adminStyles.button} onClick={() => navigate('/admin/pairings')}>
-          ペアリング一覧へ
+        <button className={adminStyles.menuCardButton} onClick={() => navigate('/admin/pairings')}>
+          ペアリング管理
         </button>
       </div>
     </AdminPageLayout>

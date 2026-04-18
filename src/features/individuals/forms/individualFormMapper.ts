@@ -25,7 +25,7 @@ export const createEmptyIndividualFormValues = (): IndividualFormValues => ({
   purchase_from: '',
   purchase_price: '',
   purchase_date: '',
-  sales_category: '',
+  sales_category: '0',
   sales_to: '',
   sales_price_tax_ex: '',
   sales_price_tax: '',

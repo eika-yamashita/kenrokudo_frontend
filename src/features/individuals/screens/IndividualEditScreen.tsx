@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AdminPageLayout,
   PageHeader,
@@ -34,6 +34,7 @@ type Props = {
 export const IndividualEditScreen = ({ speciesId, id }: Props) => {
   const formId = 'individual-edit-form';
   const navigate = useNavigate();
+  const location = useLocation();
   const individualQuery = useIndividualQuery(speciesId, id);
   const imagesQuery = useIndividualImagesQuery(speciesId, id);
   const speciesQuery = useSpeciesQuery();
@@ -86,6 +87,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
     replaceImageMutation.isPending ||
     deleteImageMutation.isPending ||
     setPrimaryMutation.isPending;
+  const listSearch = location.search;
   const confirmSave = () => {
     if (typeof window === 'undefined' || typeof window.confirm !== 'function') return true;
 
@@ -135,9 +137,9 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
             <button
               className={adminStyles.buttonGhost}
               type="button"
-              onClick={() => navigate(`/admin/individuals/detail/${speciesId}/${id}`)}
+              onClick={() => navigate(`/admin/individuals/detail/${speciesId}/${id}${listSearch}`)}
             >
-              詳細へ戻る
+              戻る
             </button>
             <button className={adminStyles.button} type="submit" form={formId} disabled={isSaving}>
               {isSaving ? '保存中...' : '保存する'}
@@ -147,7 +149,6 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
       />
 
       <form id={formId} className={adminStyles.stack} onSubmit={handleSubmit}>
-
         <IndividualImageManager
           images={imagesQuery.data ?? []}
           loading={imagesQuery.isLoading}

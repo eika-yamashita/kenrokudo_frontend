@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AdminPageLayout,
   FormActions,
@@ -31,6 +31,7 @@ type Props =
 
 export const PairingUpsertScreen = (props: Props) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const speciesQuery = useSpeciesQuery();
   const individualsQuery = useIndividualsQuery();
   const pairingQuery = usePairingQuery(
@@ -66,13 +67,14 @@ export const PairingUpsertScreen = (props: Props) => {
     createMutation.error?.message ||
     updateMutation.error?.message ||
     deleteMutation.error?.message;
+  const listSearch = location.search;
 
   const handleSubmit = form.handleSubmit(async (values) => {
     const payload = formValuesToPairing(values);
 
     if (props.mode === 'create') {
       await createMutation.mutateAsync(payload);
-      navigate('/admin/pairings');
+      navigate(`/admin/pairings${listSearch}`);
       return;
     }
 
@@ -83,7 +85,7 @@ export const PairingUpsertScreen = (props: Props) => {
       pairing: payload,
     });
 
-    navigate(`/admin/pairings/edit/${updated.species_id}/${updated.fiscal_year}/${updated.pairing_id}`, {
+    navigate(`/admin/pairings/edit/${updated.species_id}/${updated.fiscal_year}/${updated.pairing_id}${listSearch}`, {
       replace: true,
     });
   });
@@ -97,7 +99,7 @@ export const PairingUpsertScreen = (props: Props) => {
       fiscalYear: props.fiscalYear,
       pairingId: props.pairingId,
     });
-    navigate('/admin/pairings');
+    navigate(`/admin/pairings${listSearch}`);
   };
 
   if (isLoading) {
@@ -113,8 +115,8 @@ export const PairingUpsertScreen = (props: Props) => {
       <PageHeader
         title={props.mode === 'create' ? 'ペアリング新規登録' : 'ペアリング編集'}
         actions={
-          <button className={adminStyles.buttonGhost} onClick={() => navigate('/admin/pairings')}>
-            一覧へ戻る
+          <button className={adminStyles.buttonGhost} onClick={() => navigate(`/admin/pairings${listSearch}`)}>
+            {props.mode === 'edit' ? '戻る' : '一覧へ戻る'}
           </button>
         }
       />

@@ -7,6 +7,7 @@ const mockCreateMutation = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ search: '?speciesId=leo&fiscalYear=2026' }),
 }), { virtual: true });
 
 jest.mock('../../species/hooks/useSpeciesQuery', () => ({
@@ -75,6 +76,6 @@ describe('PairingUpsertScreen', () => {
         female_parent_id: 'F1',
       })
     );
-    expect(mockNavigate).toHaveBeenCalledWith('/admin/pairings');
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/pairings?speciesId=leo&fiscalYear=2026');
   });
 });

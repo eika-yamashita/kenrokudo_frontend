@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AdminPageLayout,
   PageHeader,
@@ -26,6 +26,7 @@ import {
 export const IndividualCreateScreen = () => {
   const formId = 'individual-create-form';
   const navigate = useNavigate();
+  const location = useLocation();
   const speciesQuery = useSpeciesQuery();
   const pairingsQuery = usePairingsQuery();
   const createMutation = useCreateIndividualMutation();
@@ -66,6 +67,7 @@ export const IndividualCreateScreen = () => {
   const pairings = useMemo(() => pairingsQuery.data ?? [], [pairingsQuery.data]);
   const selectedSpeciesId = form.watch('species_id');
   const speciesLabel = selectedSpeciesId ? getSpeciesLabel(selectedSpeciesId, speciesQuery.data ?? []) : '-';
+  const listSearch = location.search;
   const confirmCreate = () => {
     if (typeof window === 'undefined' || typeof window.confirm !== 'function') return true;
 
@@ -92,7 +94,7 @@ export const IndividualCreateScreen = () => {
       }
     }
 
-    navigate('/admin/individuals');
+    navigate(`/admin/individuals${listSearch}`);
   });
 
   if (isLoading) {
@@ -110,8 +112,8 @@ export const IndividualCreateScreen = () => {
         stickyActions
         actions={
           <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate('/admin/individuals')}>
-              一覧へ戻る
+            <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate(`/admin/individuals${listSearch}`)}>
+              戻る
             </button>
             <button className={adminStyles.button} type="submit" form={formId} disabled={isSaving}>
               {isSaving ? '登録中...' : '登録する'}
@@ -121,7 +123,6 @@ export const IndividualCreateScreen = () => {
       />
 
       <form id={formId} className={adminStyles.stack} onSubmit={handleSubmit}>
-
         <ImageUploadPicker
           files={imageFiles}
           previews={imagePreviews}

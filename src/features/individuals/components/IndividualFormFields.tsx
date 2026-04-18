@@ -13,10 +13,9 @@ const breedingCategoryOptions = [
 ];
 
 const salesCategoryOptions = [
-  { value: '', label: '未設定' },
   { value: '0', label: '非売個体' },
   { value: '1', label: '販売中' },
-  { value: '2', label: '販売済' },
+  { value: '2', label: '販売済み' },
 ];
 
 type Props = {
@@ -36,12 +35,15 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
 
   const speciesId = watch('species_id');
   const breedingCategory = watch('breeding_category');
+  const salesCategory = watch('sales_category');
   const selectedPairingKey =
     watch('pairing_fiscal_year') && watch('pairing_id')
       ? `${watch('pairing_fiscal_year')}|${watch('pairing_id')}`
       : '';
   const pairingSelected = Boolean(selectedPairingKey);
   const isPurchaseIndividual = breedingCategory === '1';
+  const showSalesTo = salesCategory === '2';
+  const showSalesPricing = salesCategory === '1' || salesCategory === '2';
 
   const filteredPairings = useMemo(
     () =>
@@ -106,7 +108,7 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
           <label className={adminStyles.field}>
             ペアリングID
             <select value={selectedPairingKey} onChange={(event) => handlePairingChange(event.target.value)}>
-              <option value="">選択なし（親IDを手入力）</option>
+              <option value="">選択なし / 親IDを直接入力</option>
               {filteredPairings.map((pairing) => {
                 const optionKey = `${pairing.fiscal_year}|${pairing.pairing_id}`;
                 return (
@@ -123,14 +125,8 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
         </>
       ) : (
         <>
-          <label className={adminStyles.field}>
-            種
-            <input {...register('species_id')} disabled />
-          </label>
-          <label className={adminStyles.field}>
-            個体ID
-            <input {...register('id')} disabled />
-          </label>
+          <input type="hidden" {...register('species_id')} />
+          <input type="hidden" {...register('id')} />
         </>
       )}
 
@@ -249,20 +245,35 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
           </label>
 
           <label className={adminStyles.field}>
-            購入価格
-            <input type="number" step="0.01" {...register('purchase_price')} />
+            購入日
+            <input type="date" {...register('purchase_date')} />
           </label>
 
           <label className={adminStyles.field}>
-            購入日
-            <input type="date" {...register('purchase_date')} />
+            購入価格
+            <input type="number" step="0.01" {...register('purchase_price')} />
           </label>
         </>
       ) : null}
 
       <label className={adminStyles.field}>
         販売区分
-        <select {...register('sales_category')}>
+        <select
+          {...register('sales_category')}
+          onChange={(event) => {
+            const value = event.target.value;
+            setValue('sales_category', value, { shouldDirty: true, shouldValidate: true });
+            if (value !== '2') {
+              setValue('sales_to', '', { shouldDirty: true });
+              setValue('sales_date', '', { shouldDirty: true });
+            }
+            if (value === '0') {
+              setValue('sales_price_tax_ex', '', { shouldDirty: true });
+              setValue('sales_price_tax', '', { shouldDirty: true });
+              setValue('sales_price_tax_in', '', { shouldDirty: true });
+            }
+          }}
+        >
           {salesCategoryOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -271,35 +282,45 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
         </select>
       </label>
 
-      <label className={adminStyles.field}>
-        販売先
-        <input {...register('sales_to')} />
-      </label>
+      {showSalesTo ? (
+        <label className={adminStyles.field}>
+          販売先
+          <input {...register('sales_to')} />
+        </label>
+      ) : null}
 
-      <label className={adminStyles.field}>
-        販売価格(税抜)
-        <input type="number" step="0.01" {...register('sales_price_tax_ex')} />
-      </label>
+      {showSalesTo ? (
+        <label className={adminStyles.field}>
+          販売日
+          <input type="date" {...register('sales_date')} />
+        </label>
+      ) : null}
 
-      <label className={adminStyles.field}>
-        消費税額
-        <input type="number" step="0.01" {...register('sales_price_tax')} />
-      </label>
+      {showSalesPricing ? (
+        <>
+          <label className={adminStyles.field}>
+            販売価格(税抜)
+            <input type="number" step="0.01" {...register('sales_price_tax_ex')} />
+          </label>
 
-      <label className={adminStyles.field}>
-        販売価格(税込)
-        <input type="number" step="0.01" {...register('sales_price_tax_in')} />
-      </label>
+          <label className={adminStyles.field}>
+            消費税額
+            <input type="number" step="0.01" {...register('sales_price_tax')} />
+          </label>
 
-      <label className={adminStyles.field}>
-        販売日
-        <input type="date" {...register('sales_date')} />
-      </label>
+          <label className={adminStyles.field}>
+            販売価格(税込)
+            <input type="number" step="0.01" {...register('sales_price_tax_in')} />
+          </label>
+        </>
+      ) : null}
 
-      <label className={adminStyles.field}>
-        死亡日
-        <input type="date" {...register('death_date')} />
-      </label>
+      {mode === 'edit' ? (
+        <label className={adminStyles.field}>
+          死亡日
+          <input type="date" {...register('death_date')} />
+        </label>
+      ) : null}
 
       <label className={adminStyles.field}>
         メモ

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+﻿import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IndividualCreateScreen } from './IndividualCreateScreen';
 
@@ -8,6 +8,7 @@ const mockUploadMutation = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ search: '?speciesId=leo&fiscalYear=2026' }),
 }), { virtual: true });
 
 jest.mock('../../species/hooks/useSpeciesQuery', () => ({
@@ -60,6 +61,7 @@ describe('IndividualCreateScreen', () => {
     mockUploadMutation.mockResolvedValue({});
     global.URL.createObjectURL = jest.fn(() => 'blob:preview');
     global.URL.revokeObjectURL = jest.fn();
+    window.confirm = jest.fn(() => true);
   });
 
   it('submits the form and uploads selected images', async () => {
@@ -70,7 +72,8 @@ describe('IndividualCreateScreen', () => {
     await userEvent.selectOptions(screen.getByLabelText('ペアリングID'), '2026|A');
 
     const file = new File(['binary'], 'gecko.png', { type: 'image/png' });
-    await userEvent.upload(screen.getByLabelText('画像ファイル'), file);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(fileInput, file);
     await userEvent.click(screen.getByRole('button', { name: '登録する' }));
 
     await waitFor(() => expect(mockCreateMutation).toHaveBeenCalled());
@@ -80,6 +83,6 @@ describe('IndividualCreateScreen', () => {
       file,
       isPrimary: true,
     });
-    expect(mockNavigate).toHaveBeenCalledWith('/admin/individuals');
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/individuals?speciesId=leo&fiscalYear=2026');
   });
 });
