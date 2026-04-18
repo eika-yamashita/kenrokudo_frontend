@@ -116,7 +116,7 @@ export const PairingUpsertScreen = (props: Props) => {
         title={props.mode === 'create' ? 'ペアリング新規登録' : 'ペアリング編集'}
         actions={
           <button className={adminStyles.buttonGhost} onClick={() => navigate(`/admin/pairings${listSearch}`)}>
-            {props.mode === 'edit' ? '戻る' : '一覧へ戻る'}
+            {props.mode === 'edit' ? '戻る' : '戻る'}
           </button>
         }
       />
@@ -135,7 +135,7 @@ export const PairingUpsertScreen = (props: Props) => {
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending || deleteMutation.isPending}
           >
-            {createMutation.isPending || updateMutation.isPending ? '保存中...' : '保存する'}
+            {createMutation.isPending || updateMutation.isPending ? '保存中...' : '保存'}
           </button>
           {props.mode === 'edit' ? (
             <button
@@ -144,7 +144,7 @@ export const PairingUpsertScreen = (props: Props) => {
               onClick={handleDelete}
               disabled={createMutation.isPending || updateMutation.isPending || deleteMutation.isPending}
             >
-              削除する
+              削除
             </button>
           ) : null}
         </FormActions>

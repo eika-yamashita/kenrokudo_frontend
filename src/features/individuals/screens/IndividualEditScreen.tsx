@@ -142,7 +142,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
               戻る
             </button>
             <button className={adminStyles.button} type="submit" form={formId} disabled={isSaving}>
-              {isSaving ? '保存中...' : '保存する'}
+              {isSaving ? '保存中...' : '保存'}
             </button>
           </div>
         }

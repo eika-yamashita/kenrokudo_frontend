@@ -159,7 +159,7 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
               type="button"
               onClick={() => navigate(`/admin/individuals/edit/${speciesId}/${id}${listSearch}`)}
             >
-              編集する
+              編集
             </button>
           </div>
         }

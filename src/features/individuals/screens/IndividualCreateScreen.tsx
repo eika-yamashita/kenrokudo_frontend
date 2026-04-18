@@ -116,7 +116,7 @@ export const IndividualCreateScreen = () => {
               戻る
             </button>
             <button className={adminStyles.button} type="submit" form={formId} disabled={isSaving}>
-              {isSaving ? '登録中...' : '登録する'}
+              {isSaving ? '登録中...' : '登録'}
             </button>
           </div>
         }
