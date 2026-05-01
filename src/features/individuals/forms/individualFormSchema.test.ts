@@ -9,6 +9,19 @@ describe('individualFormSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('allows empty hatch date for purchase individuals', () => {
+    const values = {
+      ...createEmptyIndividualFormValues(),
+      species_id: 'leo',
+      id: 'A1',
+      breeding_category: '1',
+      breeder: '',
+      hatch_date: '',
+    };
+
+    expect(individualFormSchema.safeParse(values).success).toBe(true);
+  });
+
   it('requires pairing fiscal year when a pairing id is selected', () => {
     const values = {
       ...createEmptyIndividualFormValues(),

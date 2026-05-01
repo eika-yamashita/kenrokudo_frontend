@@ -28,7 +28,7 @@ export const individualFormSchema = z
     note: z.string().trim(),
   })
   .superRefine((values, context) => {
-    if (!values.hatch_date) {
+    if (values.breeding_category !== '1' && !values.hatch_date) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['hatch_date'],

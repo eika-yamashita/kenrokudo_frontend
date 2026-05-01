@@ -126,10 +126,15 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
               setValue('male_parent_id', '', { shouldDirty: true });
               setValue('female_parent_id', '', { shouldDirty: true });
               setValue('breeder', '', { shouldDirty: true });
+              setValue('hatch_date', '', { shouldDirty: true, shouldValidate: true });
               return;
             }
 
             setValue('breeder', '絢禄堂', { shouldDirty: true });
+            setValue('hatch_date', new Date().toISOString().slice(0, 10), {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
             setValue('purchase_from', '', { shouldDirty: true });
             setValue('purchase_price', '', { shouldDirty: true });
             setValue('purchase_date', '', { shouldDirty: true });

@@ -85,4 +85,15 @@ describe('IndividualCreateScreen', () => {
     });
     expect(mockNavigate).toHaveBeenCalledWith('/admin/individuals?speciesId=leo&fiscalYear=2026');
   });
+
+  it('clears hatch date when purchase individual is selected', async () => {
+    render(<IndividualCreateScreen />);
+
+    const hatchDateInput = screen.getByLabelText('ハッチ日') as HTMLInputElement;
+    expect(hatchDateInput.value).not.toBe('');
+
+    await userEvent.selectOptions(screen.getByLabelText('繁殖区分'), '1');
+
+    await waitFor(() => expect(hatchDateInput.value).toBe(''));
+  });
 });

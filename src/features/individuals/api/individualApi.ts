@@ -52,25 +52,6 @@ const toSearchQueryString = ({ speciesId, fiscalYear, morph }: IndividualSearchP
   return query ? `?${query}` : '';
 };
 
-/*
-export const fetchIndividuals = (signal?: AbortSignal) =>
-  apiClient.get<Individual[]>('/individuals', '蛟倶ｽ謎ｸ隕ｧ縺ｮ蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆', signal);
-
-export const searchIndividuals = (params: IndividualSearchParams, signal?: AbortSignal) =>
-  apiClient.get<Individual[]>(
-    `/individuals/search${toSearchQueryString(params)}`,
-    '蛟倶ｽ謎ｸ隕ｧ縺ｮ讀懃ｴ｢縺ｫ螟ｱ謨励＠縺ｾ縺励◆',
-    signal
-  );
-
-export const fetchIndividual = (speciesId: string, id: string, signal?: AbortSignal) =>
-  apiClient.get<Individual[]>('/individuals', '個体一覧の取得に失敗しました', signal);
-
-export const fetchIndividual = (speciesId: string, id: string, signal?: AbortSignal) =>
-  apiClient.get<Individual>(`/individuals/${speciesId}/${id}`, '個体情報の取得に失敗しました', signal);
-
-*/
-
 export const fetchIndividuals = (signal?: AbortSignal) =>
   apiClient.get<Individual[]>('/individuals', 'Failed to fetch individuals', signal);
 
