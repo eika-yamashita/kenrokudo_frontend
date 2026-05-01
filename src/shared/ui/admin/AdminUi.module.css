@@ -395,7 +395,18 @@
 }
 
 .field input[type='date'] {
+  width: 100%;
+  max-width: 100%;
   inline-size: 100%;
+  min-inline-size: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field input[type='date']::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
 }
 
 .field input::placeholder,
@@ -771,6 +782,10 @@
   .field select,
   .field textarea {
     font-size: 16px;
+  }
+
+  .field input[type='date'] {
+    padding-inline: 10px;
   }
 
   .formGrid,

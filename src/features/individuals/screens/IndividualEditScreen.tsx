@@ -18,6 +18,7 @@ import { formValuesToIndividual, individualToFormValues } from '../forms/individ
 import { individualFormSchema, type IndividualFormValues } from '../forms/individualFormSchema';
 import {
   useDeleteIndividualImageMutation,
+  useDeleteIndividualMutation,
   useIndividualImagesQuery,
   useIndividualQuery,
   useReplaceIndividualImageMutation,
@@ -43,6 +44,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
   const uploadImageMutation = useUploadIndividualImageMutation();
   const replaceImageMutation = useReplaceIndividualImageMutation();
   const deleteImageMutation = useDeleteIndividualImageMutation();
+  const deleteIndividualMutation = useDeleteIndividualMutation();
   const setPrimaryMutation = useSetPrimaryIndividualImageMutation();
 
   const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -79,6 +81,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
     uploadImageMutation.error?.message ||
     replaceImageMutation.error?.message ||
     deleteImageMutation.error?.message ||
+    deleteIndividualMutation.error?.message ||
     setPrimaryMutation.error?.message;
 
   const isSaving =
@@ -86,6 +89,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
     uploadImageMutation.isPending ||
     replaceImageMutation.isPending ||
     deleteImageMutation.isPending ||
+    deleteIndividualMutation.isPending ||
     setPrimaryMutation.isPending;
   const listSearch = location.search;
   const confirmSave = () => {
@@ -118,6 +122,24 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
 
     setNewFiles([]);
   });
+
+  const handleDelete = async () => {
+    if (typeof window === 'undefined' || typeof window.prompt !== 'function') return;
+
+    let confirmation: string | null = null;
+    try {
+      confirmation = window.prompt('削除するには「削除」と入力してください');
+    } catch {
+      return;
+    }
+
+    if (confirmation !== '削除') return;
+
+    await deleteIndividualMutation.mutateAsync({ speciesId, id });
+    navigate(`/admin/individuals${listSearch}`, {
+      state: { successMessage: '個体情報を削除しました' },
+    });
+  };
 
   if (isLoading) {
     return <StatusBanner>読み込み中...</StatusBanner>;
@@ -173,6 +195,17 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
             speciesList={speciesQuery.data}
             pairingList={pairingsQuery.data}
           />
+        </div>
+
+        <div className={adminStyles.formActions}>
+          <button
+            className={adminStyles.buttonDanger}
+            type="button"
+            onClick={handleDelete}
+            disabled={isSaving}
+          >
+            {deleteIndividualMutation.isPending ? '削除中...' : '削除'}
+          </button>
         </div>
       </form>
 

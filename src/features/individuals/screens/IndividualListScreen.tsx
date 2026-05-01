@@ -39,6 +39,15 @@ const createListSearch = ({
     detail: detailOpen ? true : undefined,
   });
 
+const getSuccessMessage = (state: unknown) => {
+  if (!state || typeof state !== 'object') {
+    return '';
+  }
+
+  const candidate = (state as { successMessage?: unknown }).successMessage;
+  return typeof candidate === 'string' ? candidate : '';
+};
+
 export const IndividualListScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,6 +58,7 @@ export const IndividualListScreen = () => {
   const appliedMorph = searchParams.get('morph')?.trim() ?? '';
   const requestedDetailOpen = parseBooleanFlagParam(searchParams.get('detail'));
   const [draftMorph, setDraftMorph] = useState(appliedMorph);
+  const [successMessage] = useState(() => getSuccessMessage(location.state));
 
   const speciesList = speciesQuery.data ?? [];
   const defaultSpeciesId =
@@ -82,6 +92,14 @@ export const IndividualListScreen = () => {
 
     setSearchParams(currentSearch, { replace: true });
   }, [currentSearch, location.search, setSearchParams, speciesQuery.data]);
+
+  useEffect(() => {
+    if (!getSuccessMessage(location.state)) {
+      return;
+    }
+
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.pathname, location.search, location.state, navigate]);
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -232,6 +250,8 @@ export const IndividualListScreen = () => {
           </div>
         </form>
       ) : null}
+
+      {successMessage ? <StatusBanner>{successMessage}</StatusBanner> : null}
 
       <DataTable<Individual>
         columns={[
