@@ -72,7 +72,9 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
   const showSalesTo = individual.sales_category === '2';
   const showSalesPricing = individual.sales_category === '1' || individual.sales_category === '2';
   const fieldRows = [
+    ['登録年度', 'fiscal_year'],
     ['繁殖区分', 'breeding_category'],
+    ...(showBreedingDetails ? ([['ペアリング年度', 'pairing_fiscal_year']] as const) : []),
     ...(showBreedingDetails ? ([['ペアリングID', 'pairing_key']] as const) : []),
     ...(showBreedingDetails
       ? ([
@@ -116,6 +118,9 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
 
     const value = String(raw);
     if (key === 'species_id') return speciesLabel;
+    if (key === 'fiscal_year' || key === 'pairing_fiscal_year') {
+      return value;
+    }
     if (key === 'pairing_key') {
       if (!individual.pairing_fiscal_year || !individual.pairing_id) {
         return '-';

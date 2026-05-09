@@ -32,6 +32,14 @@ jest.mock('../../pairings/hooks/usePairingQueries', () => ({
         female_parent_id: 'F1',
         pairing_date: '2026-04-08',
       },
+      {
+        species_id: 'leo',
+        fiscal_year: 2025,
+        pairing_id: 'B',
+        male_parent_id: 'M2',
+        female_parent_id: 'F2',
+        pairing_date: '2025-04-08',
+      },
     ],
   }),
 }));
@@ -95,5 +103,27 @@ describe('IndividualCreateScreen', () => {
     await userEvent.selectOptions(screen.getByLabelText('繁殖区分'), '1');
 
     await waitFor(() => expect(hatchDateInput.value).toBe(''));
+  });
+
+  it('shows pairing fiscal year only for self-breeding and syncs it from fiscal year', async () => {
+    render(<IndividualCreateScreen />);
+
+    const pairingFiscalYear = screen.getByLabelText('ペアリング年度') as HTMLSelectElement;
+    expect(pairingFiscalYear.value).toBe('2026');
+
+    await userEvent.selectOptions(screen.getByLabelText('登録年度'), '2025');
+    await waitFor(() => expect(pairingFiscalYear.value).toBe('2025'));
+
+    const pairingId = screen.getByLabelText('ペアリングID') as HTMLSelectElement;
+    expect(screen.getByRole('option', { name: /2025 \/ B/ })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /2026 \/ A/ })).not.toBeInTheDocument();
+
+    await userEvent.selectOptions(screen.getByLabelText('繁殖区分'), '1');
+    expect(screen.queryByLabelText('ペアリング年度')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('ペアリングID')).not.toBeInTheDocument();
+
+    await userEvent.selectOptions(screen.getByLabelText('繁殖区分'), '0');
+    await waitFor(() => expect((screen.getByLabelText('ペアリング年度') as HTMLSelectElement).value).toBe('2025'));
+    expect((screen.getByLabelText('ペアリングID') as HTMLSelectElement).value).toBe('');
   });
 });

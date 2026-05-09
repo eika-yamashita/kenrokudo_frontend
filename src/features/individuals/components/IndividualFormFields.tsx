@@ -18,6 +18,11 @@ const salesCategoryOptions = [
   { value: '2', label: '販売済み' },
 ];
 
+const currentYear = new Date().getFullYear();
+const fiscalYearOptions = Array.from({ length: currentYear - 2021 + 1 }, (_, index) =>
+  String(currentYear - index)
+);
+
 type Props = {
   mode: 'create' | 'edit';
   form: UseFormReturn<IndividualFormValues>;
@@ -34,12 +39,12 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
   } = form;
 
   const speciesId = watch('species_id');
+  const fiscalYear = watch('fiscal_year');
   const breedingCategory = watch('breeding_category');
+  const pairingFiscalYear = watch('pairing_fiscal_year');
+  const pairingId = watch('pairing_id');
   const salesCategory = watch('sales_category');
-  const selectedPairingKey =
-    watch('pairing_fiscal_year') && watch('pairing_id')
-      ? `${watch('pairing_fiscal_year')}|${watch('pairing_id')}`
-      : '';
+  const selectedPairingKey = pairingFiscalYear && pairingId ? `${pairingFiscalYear}|${pairingId}` : '';
   const pairingSelected = Boolean(selectedPairingKey);
   const isPurchaseIndividual = breedingCategory === '1';
   const isSelfBreeding = breedingCategory === '0';
@@ -49,33 +54,53 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
   const filteredPairings = useMemo(
     () =>
       pairingList
-        .filter((pairing) => pairing.species_id === speciesId)
+        .filter(
+          (pairing) =>
+            pairing.species_id === speciesId &&
+            (!pairingFiscalYear || String(pairing.fiscal_year) === pairingFiscalYear)
+        )
         .sort((a, b) => {
           const yearDiff = (b.fiscal_year ?? 0) - (a.fiscal_year ?? 0);
-          if (yearDiff !== 0) return yearDiff;
+          if (yearDiff !== 0) {
+            return yearDiff;
+          }
           return (a.pairing_id ?? '').localeCompare(b.pairing_id ?? '');
         }),
-    [pairingList, speciesId]
+    [pairingFiscalYear, pairingList, speciesId]
   );
+
+  const clearPairingSelection = () => {
+    setValue('pairing_id', '', { shouldDirty: true, shouldValidate: true });
+    setValue('male_parent_id', '', { shouldDirty: true, shouldValidate: true });
+    setValue('female_parent_id', '', { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handlePairingFiscalYearChange = (value: string) => {
+    setValue('pairing_fiscal_year', value, { shouldDirty: true, shouldValidate: true });
+    clearPairingSelection();
+  };
 
   const handlePairingChange = (value: string) => {
     if (!value) {
-      setValue('pairing_fiscal_year', '', { shouldDirty: true });
-      setValue('pairing_id', '', { shouldDirty: true });
-      setValue('male_parent_id', '', { shouldDirty: true });
-      setValue('female_parent_id', '', { shouldDirty: true });
+      clearPairingSelection();
       return;
     }
 
-    const [fiscalYear, pairingId] = value.split('|');
+    const [selectedFiscalYear, selectedPairingId] = value.split('|');
     const selected = filteredPairings.find(
-      (pairing) => String(pairing.fiscal_year) === fiscalYear && pairing.pairing_id === pairingId
+      (pairing) =>
+        String(pairing.fiscal_year) === selectedFiscalYear && pairing.pairing_id === selectedPairingId
     );
 
-    if (!selected) return;
+    if (!selected) {
+      return;
+    }
 
-    setValue('pairing_fiscal_year', fiscalYear, { shouldDirty: true, shouldValidate: true });
-    setValue('pairing_id', pairingId, { shouldDirty: true, shouldValidate: true });
+    setValue('pairing_fiscal_year', selectedFiscalYear, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setValue('pairing_id', selectedPairingId, { shouldDirty: true, shouldValidate: true });
     setValue('male_parent_id', selected.male_parent_id, { shouldDirty: true, shouldValidate: true });
     setValue('female_parent_id', selected.female_parent_id, { shouldDirty: true, shouldValidate: true });
   };
@@ -90,10 +115,11 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
               {...register('species_id')}
               onChange={(event) => {
                 setValue('species_id', event.target.value, { shouldDirty: true, shouldValidate: true });
-                setValue('pairing_fiscal_year', '', { shouldDirty: true });
-                setValue('pairing_id', '', { shouldDirty: true });
-                setValue('male_parent_id', '', { shouldDirty: true });
-                setValue('female_parent_id', '', { shouldDirty: true });
+                setValue('pairing_fiscal_year', fiscalYear, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                clearPairingSelection();
               }}
             >
               <option value="">選択してください</option>
@@ -105,10 +131,31 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
             </select>
             {errors.species_id ? <p className={adminStyles.fieldError}>{errors.species_id.message}</p> : null}
           </label>
+
+          <label className={adminStyles.field}>
+            登録年度
+            <select
+              {...register('fiscal_year')}
+              onChange={(event) => {
+                const value = event.target.value;
+                setValue('fiscal_year', value, { shouldDirty: true, shouldValidate: true });
+                setValue('pairing_fiscal_year', value, { shouldDirty: true, shouldValidate: true });
+                clearPairingSelection();
+              }}
+            >
+              {fiscalYearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+            {errors.fiscal_year ? <p className={adminStyles.fieldError}>{errors.fiscal_year.message}</p> : null}
+          </label>
         </>
       ) : (
         <>
           <input type="hidden" {...register('species_id')} />
+          <input type="hidden" {...register('fiscal_year')} />
           <input type="hidden" {...register('id')} />
         </>
       )}
@@ -120,17 +167,17 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
           onChange={(event) => {
             const value = event.target.value;
             setValue('breeding_category', value, { shouldDirty: true, shouldValidate: true });
+
             if (value === '1') {
-              setValue('pairing_fiscal_year', '', { shouldDirty: true });
-              setValue('pairing_id', '', { shouldDirty: true });
-              setValue('male_parent_id', '', { shouldDirty: true });
-              setValue('female_parent_id', '', { shouldDirty: true });
+              setValue('pairing_fiscal_year', '', { shouldDirty: true, shouldValidate: true });
+              clearPairingSelection();
               setValue('breeder', '', { shouldDirty: true });
               setValue('hatch_date', '', { shouldDirty: true, shouldValidate: true });
               return;
             }
 
             setValue('breeder', '絢禄堂', { shouldDirty: true });
+            setValue('pairing_fiscal_year', fiscalYear, { shouldDirty: true, shouldValidate: true });
             setValue('hatch_date', new Date().toISOString().slice(0, 10), {
               shouldDirty: true,
               shouldValidate: true,
@@ -166,10 +213,27 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
 
       {isSelfBreeding ? (
         <>
+          <input type="hidden" {...register('pairing_fiscal_year')} />
+          <input type="hidden" {...register('pairing_id')} />
+
+          <label className={adminStyles.field}>
+            ペアリング年度
+            <select value={pairingFiscalYear} onChange={(event) => handlePairingFiscalYearChange(event.target.value)}>
+              {fiscalYearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+            {errors.pairing_fiscal_year ? (
+              <p className={adminStyles.fieldError}>{errors.pairing_fiscal_year.message}</p>
+            ) : null}
+          </label>
+
           <label className={adminStyles.field}>
             ペアリングID
             <select value={selectedPairingKey} onChange={(event) => handlePairingChange(event.target.value)}>
-              <option value="">選択なし / 親IDを直接入力</option>
+              <option value="">選択しない / 親IDを直接入力</option>
               {filteredPairings.map((pairing) => {
                 const optionKey = `${pairing.fiscal_year}|${pairing.pairing_id}`;
                 return (
@@ -179,9 +243,6 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
                 );
               })}
             </select>
-            {errors.pairing_fiscal_year ? (
-              <p className={adminStyles.fieldError}>{errors.pairing_fiscal_year.message}</p>
-            ) : null}
           </label>
 
           <label className={adminStyles.field}>
@@ -225,7 +286,7 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
       </label>
 
       <label className={adminStyles.field}>
-        雌雄区分
+        性別区分
         <select {...register('gender_category')}>
           {genderCategoryOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -236,7 +297,7 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
       </label>
 
       <label className={adminStyles.field}>
-        ブリーダー名
+        ブリーダー
         <input {...register('breeder')} />
       </label>
 

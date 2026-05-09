@@ -16,6 +16,7 @@ const toNullableNumber = (value: number | undefined | null | string) =>
 
 const normalizeIndividualForApi = (individual: Individual) => ({
   ...individual,
+  fiscal_year: toNullableNumber(individual.fiscal_year as number | undefined),
   id: toNullableString(individual.id),
   pairing_fiscal_year: toNullableNumber(individual.pairing_fiscal_year as number | undefined),
   pairing_id: toNullableString(individual.pairing_id),

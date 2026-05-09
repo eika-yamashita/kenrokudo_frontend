@@ -1,5 +1,6 @@
 export interface Individual {
   species_id: string;
+  fiscal_year: number;
   id: string;
   pairing_fiscal_year?: number;
   pairing_id?: string;

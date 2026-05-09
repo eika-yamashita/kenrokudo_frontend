@@ -1,17 +1,21 @@
 import type { Individual } from '../../../api/models/Individual';
+import { toDateInputValue } from '../../../utils/dateFormat';
 import type { IndividualFormValues } from './individualFormSchema';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const now = () => new Date().toISOString().slice(0, 16);
+const currentYear = () => String(new Date().getFullYear());
 
-const toStringValue = (value?: string | number | null) => (value === undefined || value === null ? '' : String(value));
+const toStringValue = (value?: string | number | null) =>
+  value === undefined || value === null ? '' : String(value);
 
 const toOptionalNumber = (value: string) => (value.trim() === '' ? undefined : Number(value));
 
 export const createEmptyIndividualFormValues = (): IndividualFormValues => ({
   species_id: '',
+  fiscal_year: currentYear(),
   id: '',
-  pairing_fiscal_year: '',
+  pairing_fiscal_year: currentYear(),
   pairing_id: '',
   male_parent_id: '',
   female_parent_id: '',
@@ -37,6 +41,7 @@ export const createEmptyIndividualFormValues = (): IndividualFormValues => ({
 
 export const individualToFormValues = (individual: Individual): IndividualFormValues => ({
   species_id: individual.species_id,
+  fiscal_year: toStringValue(individual.fiscal_year),
   id: individual.id,
   pairing_fiscal_year: toStringValue(individual.pairing_fiscal_year),
   pairing_id: toStringValue(individual.pairing_id),
@@ -47,18 +52,18 @@ export const individualToFormValues = (individual: Individual): IndividualFormVa
   gender_category: toStringValue(individual.gender_category),
   breeding_category: toStringValue(individual.breeding_category),
   breeder: toStringValue(individual.breeder),
-  clutch_date: toStringValue(individual.clutch_date),
-  hatch_date: toStringValue(individual.hatch_date),
+  clutch_date: toDateInputValue(individual.clutch_date),
+  hatch_date: toDateInputValue(individual.hatch_date),
   purchase_from: toStringValue(individual.purchase_from),
   purchase_price: toStringValue(individual.purchase_price),
-  purchase_date: toStringValue(individual.purchase_date),
+  purchase_date: toDateInputValue(individual.purchase_date),
   sales_category: toStringValue(individual.sales_category),
   sales_to: toStringValue(individual.sales_to),
   sales_price_tax_ex: toStringValue(individual.sales_price_tax_ex),
   sales_price_tax: toStringValue(individual.sales_price_tax),
   sales_price_tax_in: toStringValue(individual.sales_price_tax_in),
-  sales_date: toStringValue(individual.sales_date),
-  death_date: toStringValue(individual.death_date),
+  sales_date: toDateInputValue(individual.sales_date),
+  death_date: toDateInputValue(individual.death_date),
   note: toStringValue(individual.note),
 });
 
@@ -67,6 +72,7 @@ export const formValuesToIndividual = (
   base?: Individual
 ): Individual => ({
   species_id: values.species_id,
+  fiscal_year: Number(values.fiscal_year),
   id: values.id,
   pairing_fiscal_year: toOptionalNumber(values.pairing_fiscal_year),
   pairing_id: values.pairing_id || undefined,

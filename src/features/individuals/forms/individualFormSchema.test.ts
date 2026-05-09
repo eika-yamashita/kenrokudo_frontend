@@ -22,6 +22,17 @@ describe('individualFormSchema', () => {
     expect(individualFormSchema.safeParse(values).success).toBe(true);
   });
 
+  it('requires fiscal year', () => {
+    const values = {
+      ...createEmptyIndividualFormValues(),
+      species_id: 'leo',
+      fiscal_year: '',
+      hatch_date: '2026-04-08',
+    };
+
+    expect(individualFormSchema.safeParse(values).success).toBe(false);
+  });
+
   it('requires pairing fiscal year when a pairing id is selected', () => {
     const values = {
       ...createEmptyIndividualFormValues(),
