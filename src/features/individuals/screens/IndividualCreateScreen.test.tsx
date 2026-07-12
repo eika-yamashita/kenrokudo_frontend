@@ -44,6 +44,28 @@ jest.mock('../../pairings/hooks/usePairingQueries', () => ({
   }),
 }));
 
+jest.mock('../../morphs/hooks/useMorphQueries', () => ({
+  useMorphsQuery: () => ({
+    isLoading: false,
+    error: null,
+    data: [
+      { species_id: 'leo', morph_id: '001', morph_name: 'Mack Snow', inheritance_category: '0' },
+      { species_id: 'leo', morph_id: '002', morph_name: 'Bell Albino', inheritance_category: '1' },
+    ],
+  }),
+}));
+
+jest.mock('../../bloodlines/hooks/useBloodlineQueries', () => ({
+  useBloodlinesQuery: () => ({
+    isLoading: false,
+    error: null,
+    data: [
+      { species_id: 'leo', morph_id: '001', bloodline_id: '001', bloodline_name: 'US Line' },
+      { species_id: 'leo', morph_id: '002', bloodline_id: '001', bloodline_name: 'EU Line' },
+    ],
+  }),
+}));
+
 jest.mock('../hooks/useIndividualQueries', () => ({
   useCreateIndividualMutation: () => ({
     isPending: false,
@@ -77,6 +99,7 @@ describe('IndividualCreateScreen', () => {
 
     await userEvent.clear(screen.getByLabelText('個体ID'));
     await userEvent.type(screen.getByLabelText('個体ID'), 'a1');
+    await userEvent.selectOptions(screen.getByLabelText('モルフ'), '001');
     await userEvent.selectOptions(screen.getByLabelText('ペアリングID'), '2026|A');
 
     const file = new File(['binary'], 'gecko.png', { type: 'image/png' });
@@ -114,7 +137,6 @@ describe('IndividualCreateScreen', () => {
     await userEvent.selectOptions(screen.getByLabelText('登録年度'), '2025');
     await waitFor(() => expect(pairingFiscalYear.value).toBe('2025'));
 
-    const pairingId = screen.getByLabelText('ペアリングID') as HTMLSelectElement;
     expect(screen.getByRole('option', { name: /2025 \/ B/ })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: /2026 \/ A/ })).not.toBeInTheDocument();
 
@@ -124,6 +146,17 @@ describe('IndividualCreateScreen', () => {
 
     await userEvent.selectOptions(screen.getByLabelText('繁殖区分'), '0');
     await waitFor(() => expect((screen.getByLabelText('ペアリング年度') as HTMLSelectElement).value).toBe('2025'));
-    expect((screen.getByLabelText('ペアリングID') as HTMLSelectElement).value).toBe('');
+    const pairingIdSelect = screen.getByText('ペアリングID').closest('label')?.querySelector('select');
+    expect(pairingIdSelect).toHaveValue('');
+  });
+
+  it('adds another het row after selecting the current last het row', async () => {
+    render(<IndividualCreateScreen />);
+
+    expect(screen.queryByLabelText('ヘテロ2')).not.toBeInTheDocument();
+
+    await userEvent.selectOptions(screen.getByLabelText('ヘテロ1'), '002');
+
+    expect(await screen.findByLabelText('ヘテロ2')).toBeInTheDocument();
   });
 });

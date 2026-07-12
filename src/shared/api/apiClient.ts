@@ -49,10 +49,16 @@ const parseResponseText = async (response: Response) => {
 const resolveErrorMessage = (payload: unknown, fallback: string) => {
   if (!payload) return fallback;
   if (typeof payload === 'string') return payload.trim() || fallback;
-  if (typeof payload === 'object' && payload !== null && 'message' in payload) {
-    const message = payload.message;
-    if (typeof message === 'string' && message.trim()) {
-      return message;
+  if (typeof payload === 'object' && payload !== null) {
+    const record = payload as Record<string, unknown>;
+    const candidates = ['message', 'detail', 'error', 'title', 'reason'] as const;
+    for (const key of candidates) {
+      if (key in record) {
+        const value = record[key];
+        if (typeof value === 'string' && value.trim()) {
+          return value;
+        }
+      }
     }
   }
 

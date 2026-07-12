@@ -11,6 +11,7 @@ import { formatGenderCategory } from '../../../utils/genderCategory';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { IndividualThumbnailCell } from '../components/IndividualThumbnailCell';
 import { useIndividualSearchQuery } from '../hooks/useIndividualQueries';
+import { getIndividualMorphDisplay } from '../utils/getIndividualMorphDisplay';
 
 const DEFAULT_SPECIES_ID = '0001';
 const DEFAULT_FISCAL_YEAR = new Date().getFullYear();
@@ -263,7 +264,7 @@ export const IndividualListScreen = () => {
             ),
           },
           { key: 'id', header: '個体ID', renderCell: (individual) => individual.id },
-          { key: 'morph', header: 'モルフ', renderCell: (individual) => individual.morph ?? '-' },
+          { key: 'morph', header: 'モルフ', renderCell: (individual) => getIndividualMorphDisplay(individual) || '-' },
           {
             key: 'gender',
             header: '性別',

@@ -1,4 +1,5 @@
 import type { Individual } from '../../../api/models/Individual';
+import type { IndividualMorph } from '../../../api/models/IndividualMorph';
 import type { IndividualImage } from '../../../api/models/IndividualImage';
 import { apiClient, ApiError } from '../../../shared/api/apiClient';
 
@@ -14,6 +15,17 @@ const toNullableString = (value: string | undefined | null) =>
 const toNullableNumber = (value: number | undefined | null | string) =>
   value === undefined || value === null || value === '' ? null : Number(value);
 
+const normalizeMorphEntriesForApi = (entries?: IndividualMorph[]) =>
+  (entries ?? []).map((entry) => ({
+    morph_id: toNullableString(entry.morph_id),
+    morph_name: toNullableString(entry.morph_name),
+    bloodline_id: toNullableString(entry.bloodline_id),
+    bloodline_name: toNullableString(entry.bloodline_name),
+    expression_category: toNullableString(entry.expression_category),
+    possible_het_percentage: toNullableNumber(entry.possible_het_percentage as number | undefined),
+    sort_order: toNullableNumber(entry.sort_order as number | undefined),
+  }));
+
 const normalizeIndividualForApi = (individual: Individual) => ({
   ...individual,
   fiscal_year: toNullableNumber(individual.fiscal_year as number | undefined),
@@ -22,8 +34,7 @@ const normalizeIndividualForApi = (individual: Individual) => ({
   pairing_id: toNullableString(individual.pairing_id),
   male_parent_id: toNullableString(individual.male_parent_id),
   female_parent_id: toNullableString(individual.female_parent_id),
-  morph: toNullableString(individual.morph),
-  bloodline: toNullableString(individual.bloodline),
+  morph_entries: normalizeMorphEntriesForApi(individual.morph_entries),
   gender_category: toNullableString(individual.gender_category),
   breeding_category: toNullableString(individual.breeding_category),
   breeder: toNullableString(individual.breeder),

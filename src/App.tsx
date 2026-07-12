@@ -1,6 +1,16 @@
 ﻿import { BrowserRouter as Router, Link, Route, Routes, useLocation } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { AdminMenuPage } from './pages/AdminMenuPage';
+import { MasterMenuPage } from './pages/MasterMenuPage';
+import { SpeciesListPage } from './pages/SpeciesListPage';
+import { SpeciesDetailPage } from './pages/SpeciesDetailPage';
+import { SpeciesUpsertPage } from './pages/SpeciesUpsertPage';
+import { MorphListPage } from './pages/MorphListPage';
+import { MorphDetailPage } from './pages/MorphDetailPage';
+import { MorphUpsertPage } from './pages/MorphUpsertPage';
+import { BloodlineListPage } from './pages/BloodlineListPage';
+import { BloodlineDetailPage } from './pages/BloodlineDetailPage';
+import { BloodlineUpsertPage } from './pages/BloodlineUpsertPage';
 import { IndividualListPage } from './pages/IndividualListPage';
 import { IndividualDetailPage } from './pages/IndividualDetailPage';
 import { IndividualEditorPage } from './pages/IndividualEditorPage';
@@ -32,6 +42,25 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminMenuPage />} />
+          <Route path="/admin/masters" element={<MasterMenuPage />} />
+          <Route path="/admin/masters/species" element={<SpeciesListPage />} />
+          <Route path="/admin/masters/species/new" element={<SpeciesUpsertPage mode="create" />} />
+          <Route path="/admin/masters/species/detail/:species_id" element={<SpeciesDetailPage />} />
+          <Route path="/admin/masters/species/edit/:species_id" element={<SpeciesUpsertPage mode="edit" />} />
+          <Route path="/admin/masters/morphs" element={<MorphListPage />} />
+          <Route path="/admin/masters/morphs/new" element={<MorphUpsertPage mode="create" />} />
+          <Route path="/admin/masters/morphs/detail/:species_id/:morph_id" element={<MorphDetailPage />} />
+          <Route path="/admin/masters/morphs/edit/:species_id/:morph_id" element={<MorphUpsertPage mode="edit" />} />
+          <Route path="/admin/masters/bloodlines" element={<BloodlineListPage />} />
+          <Route path="/admin/masters/bloodlines/new" element={<BloodlineUpsertPage mode="create" />} />
+          <Route
+            path="/admin/masters/bloodlines/detail/:species_id/:morph_id/:bloodline_id"
+            element={<BloodlineDetailPage />}
+          />
+          <Route
+            path="/admin/masters/bloodlines/edit/:species_id/:morph_id/:bloodline_id"
+            element={<BloodlineUpsertPage mode="edit" />}
+          />
           <Route path="/admin/individuals" element={<IndividualListPage />} />
           <Route path="/admin/individuals/new" element={<IndividualCreatePage />} />
           <Route path="/admin/individuals/detail/:species_id/:id" element={<IndividualDetailPage />} />

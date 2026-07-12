@@ -1,15 +1,17 @@
+import type { UseFormReturn } from 'react-hook-form';
 import type { Individual } from '../../../api/models/Individual';
 import type { Species } from '../../../api/models/Species';
-import { normalizeIdInput } from '../../../utils/idNormalizer';
+import { adminStyles } from '../../../shared/ui/admin';
 import { isFemaleCategory, isMaleCategory } from '../../../utils/genderFilter';
+import { normalizeIdInput } from '../../../utils/idNormalizer';
+import { getIndividualMorphDisplay } from '../../individuals/utils/getIndividualMorphDisplay';
 import { getSpeciesLabel } from '../../species/utils/getSpeciesLabel';
 import type { PairingFormValues } from '../forms/pairingFormSchema';
-import type { UseFormReturn } from 'react-hook-form';
-import { adminStyles } from '../../../shared/ui/admin';
 
 const buildIndividualLabel = (individual: Individual) => {
-  if (individual.morph) {
-    return `${individual.id} (${individual.morph})`;
+  const morph = getIndividualMorphDisplay(individual);
+  if (morph) {
+    return `${individual.id} (${morph})`;
   }
 
   return individual.id;
@@ -43,7 +45,9 @@ export const PairingForm = ({ mode, form, speciesList, individuals }: Props) => 
         種
         <select
           {...register('species_id')}
+          disabled={mode === 'edit'}
           onChange={(event) => {
+            if (mode === 'edit') return;
             form.setValue('species_id', event.target.value, { shouldDirty: true, shouldValidate: true });
             form.setValue('male_parent_id', '', { shouldDirty: true });
             form.setValue('female_parent_id', '', { shouldDirty: true });
@@ -52,7 +56,9 @@ export const PairingForm = ({ mode, form, speciesList, individuals }: Props) => 
           <option value="">選択してください</option>
           {speciesList.map((species) => (
             <option key={species.species_id} value={species.species_id}>
-              {getSpeciesLabel(species.species_id, speciesList)} ({species.species_id})
+              {mode === 'edit'
+                ? getSpeciesLabel(species.species_id, speciesList)
+                : `${getSpeciesLabel(species.species_id, speciesList)} (${species.species_id})`}
             </option>
           ))}
         </select>
@@ -98,7 +104,11 @@ export const PairingForm = ({ mode, form, speciesList, individuals }: Props) => 
         />
         <datalist id={`pairing-male-${mode}`}>
           {maleCandidates.map((individual) => (
-            <option key={`${individual.species_id}-${individual.id}`} value={individual.id} label={buildIndividualLabel(individual)} />
+            <option
+              key={`${individual.species_id}-${individual.id}`}
+              value={individual.id}
+              label={buildIndividualLabel(individual)}
+            />
           ))}
         </datalist>
         {errors.male_parent_id ? <p className={adminStyles.fieldError}>{errors.male_parent_id.message}</p> : null}
@@ -119,12 +129,14 @@ export const PairingForm = ({ mode, form, speciesList, individuals }: Props) => 
         />
         <datalist id={`pairing-female-${mode}`}>
           {femaleCandidates.map((individual) => (
-            <option key={`${individual.species_id}-${individual.id}`} value={individual.id} label={buildIndividualLabel(individual)} />
+            <option
+              key={`${individual.species_id}-${individual.id}`}
+              value={individual.id}
+              label={buildIndividualLabel(individual)}
+            />
           ))}
         </datalist>
-        {errors.female_parent_id ? (
-          <p className={adminStyles.fieldError}>{errors.female_parent_id.message}</p>
-        ) : null}
+        {errors.female_parent_id ? <p className={adminStyles.fieldError}>{errors.female_parent_id.message}</p> : null}
       </label>
 
       <label className={adminStyles.field}>

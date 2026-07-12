@@ -27,7 +27,14 @@ jest.mock('../hooks/useIndividualQueries', () => ({
       {
         species_id: 'leo',
         id: 'A1',
-        morph: 'Mack Snow',
+        morph_entries: [
+          {
+            morph_id: '001',
+            morph_name: 'Mack Snow',
+            expression_category: '0',
+            sort_order: 0,
+          },
+        ],
         gender_category: '1',
         create_user: 'system',
         create_at: '2026-04-08T10:15',

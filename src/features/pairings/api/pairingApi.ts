@@ -29,7 +29,7 @@ export const fetchPairingList = (signal?: AbortSignal) =>
 export const searchPairings = (params: PairingSearchParams, signal?: AbortSignal) =>
   apiClient.get<Pairing[]>(
     `/pairings/search${toSearchQueryString(params)}`,
-    'Failed to search pairings',
+    'ペアリング検索に失敗しました',
     signal
   );
 
@@ -41,7 +41,7 @@ export const fetchPairing = (speciesId: string, fiscalYear: number, pairingId: s
   );
 
 export const createPairing = (pairing: Pairing) =>
-  apiClient.post<Pairing>('/pairings', normalizePairingForApi(pairing), 'ペアリングの登録に失敗しました');
+  apiClient.post<Pairing>('/pairings', normalizePairingForApi(pairing), 'ペアリング情報の登録に失敗しました');
 
 export const updatePairing = (speciesId: string, fiscalYear: number, pairingId: string, pairing: Pairing) =>
   apiClient.put<Pairing>(

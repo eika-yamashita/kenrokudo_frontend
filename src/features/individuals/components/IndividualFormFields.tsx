@@ -1,5 +1,7 @@
-import { useMemo } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import { useEffect, useMemo } from 'react';
+import { useFieldArray, type UseFormReturn } from 'react-hook-form';
+import type { BloodlineMaster } from '../../../api/models/BloodlineMaster';
+import type { MorphMaster } from '../../../api/models/MorphMaster';
 import type { Pairing } from '../../../api/models/Pairing';
 import type { Species } from '../../../api/models/Species';
 import { adminStyles } from '../../../shared/ui/admin';
@@ -23,27 +25,66 @@ const fiscalYearOptions = Array.from({ length: currentYear - 2021 + 1 }, (_, ind
   String(currentYear - index)
 );
 
+const inheritanceCategoryOptions = [
+  { value: '0', label: '多因性遺伝' },
+  { value: '1', label: '劣性遺伝' },
+  { value: '2', label: '優勢遺伝' },
+  { value: '3', label: '共優勢遺伝' },
+];
+
 type Props = {
   mode: 'create' | 'edit';
   form: UseFormReturn<IndividualFormValues>;
   speciesList: Species[];
   pairingList: Pairing[];
+  morphList: MorphMaster[];
+  bloodlineList: BloodlineMaster[];
 };
 
-export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: Props) => {
+const emptyHetEntry = () => ({ morph_id: '' });
+const emptyPossibleHetEntry = () => ({ morph_id: '', possible_het_percentage: '' });
+
+export const IndividualFormFields = ({
+  mode,
+  form,
+  speciesList,
+  pairingList,
+  morphList,
+  bloodlineList,
+}: Props) => {
   const {
+    control,
     formState: { errors },
     register,
     setValue,
     watch,
   } = form;
 
+  const {
+    fields: hetFields,
+    append: appendHet,
+  } = useFieldArray({
+    control,
+    name: 'het_entries',
+  });
+  const {
+    fields: possibleHetFields,
+    append: appendPossibleHet,
+  } = useFieldArray({
+    control,
+    name: 'possible_het_entries',
+  });
+
   const speciesId = watch('species_id');
   const fiscalYear = watch('fiscal_year');
   const breedingCategory = watch('breeding_category');
   const pairingFiscalYear = watch('pairing_fiscal_year');
   const pairingId = watch('pairing_id');
+  const visualMorphId = watch('visual_morph_id');
+  const bloodlineId = watch('bloodline_id');
   const salesCategory = watch('sales_category');
+  const hetEntries = watch('het_entries');
+  const possibleHetEntries = watch('possible_het_entries');
   const selectedPairingKey = pairingFiscalYear && pairingId ? `${pairingFiscalYear}|${pairingId}` : '';
   const pairingSelected = Boolean(selectedPairingKey);
   const isPurchaseIndividual = breedingCategory === '1';
@@ -69,10 +110,70 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
     [pairingFiscalYear, pairingList, speciesId]
   );
 
+  const filteredMorphs = useMemo(
+    () =>
+      morphList
+        .filter((morph) => morph.species_id === speciesId)
+        .sort((a, b) => a.morph_id.localeCompare(b.morph_id)),
+    [morphList, speciesId]
+  );
+
+  const recessiveMorphs = useMemo(
+    () => filteredMorphs.filter((morph) => morph.inheritance_category === '1'),
+    [filteredMorphs]
+  );
+
+  const filteredBloodlines = useMemo(
+    () =>
+      bloodlineList
+        .filter((bloodline) => bloodline.species_id === speciesId && bloodline.morph_id === visualMorphId)
+        .sort((a, b) => a.bloodline_id.localeCompare(b.bloodline_id)),
+    [bloodlineList, speciesId, visualMorphId]
+  );
+
+  useEffect(() => {
+    if (hetFields.length === 0) {
+      appendHet(emptyHetEntry());
+      return;
+    }
+
+    const lastEntry = hetEntries?.[hetEntries.length - 1];
+    if (lastEntry && lastEntry.morph_id.trim() !== '') {
+      appendHet(emptyHetEntry());
+    }
+  }, [appendHet, hetEntries, hetFields.length]);
+
+  useEffect(() => {
+    if (possibleHetFields.length === 0) {
+      appendPossibleHet(emptyPossibleHetEntry());
+      return;
+    }
+
+    const lastEntry = possibleHetEntries?.[possibleHetEntries.length - 1];
+    if (lastEntry && lastEntry.morph_id.trim() !== '') {
+      appendPossibleHet(emptyPossibleHetEntry());
+    }
+  }, [appendPossibleHet, possibleHetEntries, possibleHetFields.length]);
+
   const clearPairingSelection = () => {
     setValue('pairing_id', '', { shouldDirty: true, shouldValidate: true });
     setValue('male_parent_id', '', { shouldDirty: true, shouldValidate: true });
     setValue('female_parent_id', '', { shouldDirty: true, shouldValidate: true });
+  };
+
+  const clearMorphSelections = () => {
+    setValue('visual_morph_id', '', { shouldDirty: true, shouldValidate: true });
+    setValue('bloodline_id', '', { shouldDirty: true, shouldValidate: true });
+    setValue(
+      'het_entries',
+      [emptyHetEntry()],
+      { shouldDirty: true, shouldValidate: true }
+    );
+    setValue(
+      'possible_het_entries',
+      [emptyPossibleHetEntry()],
+      { shouldDirty: true, shouldValidate: true }
+    );
   };
 
   const handlePairingFiscalYearChange = (value: string) => {
@@ -96,13 +197,24 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
       return;
     }
 
-    setValue('pairing_fiscal_year', selectedFiscalYear, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setValue('pairing_fiscal_year', selectedFiscalYear, { shouldDirty: true, shouldValidate: true });
     setValue('pairing_id', selectedPairingId, { shouldDirty: true, shouldValidate: true });
     setValue('male_parent_id', selected.male_parent_id, { shouldDirty: true, shouldValidate: true });
     setValue('female_parent_id', selected.female_parent_id, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleHetChange = (index: number, value: string) => {
+    setValue(`het_entries.${index}.morph_id`, value, { shouldDirty: true, shouldValidate: true });
+    if (value && index === hetFields.length - 1) {
+      appendHet(emptyHetEntry());
+    }
+  };
+
+  const handlePossibleHetChange = (index: number, value: string) => {
+    setValue(`possible_het_entries.${index}.morph_id`, value, { shouldDirty: true, shouldValidate: true });
+    if (value && index === possibleHetFields.length - 1) {
+      appendPossibleHet(emptyPossibleHetEntry());
+    }
   };
 
   return (
@@ -115,11 +227,9 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
               {...register('species_id')}
               onChange={(event) => {
                 setValue('species_id', event.target.value, { shouldDirty: true, shouldValidate: true });
-                setValue('pairing_fiscal_year', fiscalYear, {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                });
+                setValue('pairing_fiscal_year', fiscalYear, { shouldDirty: true, shouldValidate: true });
                 clearPairingSelection();
+                clearMorphSelections();
               }}
             >
               <option value="">選択してください</option>
@@ -176,7 +286,7 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
               return;
             }
 
-            setValue('breeder', '絢禄堂', { shouldDirty: true });
+            setValue('breeder', '自家繁殖', { shouldDirty: true });
             setValue('pairing_fiscal_year', fiscalYear, { shouldDirty: true, shouldValidate: true });
             setValue('hatch_date', new Date().toISOString().slice(0, 10), {
               shouldDirty: true,
@@ -213,9 +323,6 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
 
       {isSelfBreeding ? (
         <>
-          <input type="hidden" {...register('pairing_fiscal_year')} />
-          <input type="hidden" {...register('pairing_id')} />
-
           <label className={adminStyles.field}>
             ペアリング年度
             <select value={pairingFiscalYear} onChange={(event) => handlePairingFiscalYearChange(event.target.value)}>
@@ -233,7 +340,7 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
           <label className={adminStyles.field}>
             ペアリングID
             <select value={selectedPairingKey} onChange={(event) => handlePairingChange(event.target.value)}>
-              <option value="">選択しない / 親IDを直接入力</option>
+              <option value="">選択してください</option>
               {filteredPairings.map((pairing) => {
                 const optionKey = `${pairing.fiscal_year}|${pairing.pairing_id}`;
                 return (
@@ -243,6 +350,7 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
                 );
               })}
             </select>
+            {errors.pairing_id ? <p className={adminStyles.fieldError}>{errors.pairing_id.message}</p> : null}
           </label>
 
           <label className={adminStyles.field}>
@@ -277,12 +385,127 @@ export const IndividualFormFields = ({ mode, form, speciesList, pairingList }: P
 
       <label className={adminStyles.field}>
         モルフ
-        <input {...register('morph')} />
+        <select
+          {...register('visual_morph_id')}
+          value={visualMorphId}
+          onChange={(event) => {
+            setValue('visual_morph_id', event.target.value, { shouldDirty: true, shouldValidate: true });
+            setValue('bloodline_id', '', { shouldDirty: true, shouldValidate: true });
+          }}
+        >
+          <option value="">選択してください</option>
+          {filteredMorphs.map((morph) => (
+            <option key={`${morph.species_id}-${morph.morph_id}`} value={morph.morph_id}>
+              {morph.morph_name}
+            </option>
+          ))}
+        </select>
+        {errors.visual_morph_id ? <p className={adminStyles.fieldError}>{errors.visual_morph_id.message}</p> : null}
       </label>
 
       <label className={adminStyles.field}>
         血統
-        <input {...register('bloodline')} />
+        <select
+          {...register('bloodline_id')}
+          value={bloodlineId}
+          onChange={(event) => setValue('bloodline_id', event.target.value, { shouldDirty: true, shouldValidate: true })}
+          disabled={!visualMorphId}
+        >
+          <option value="">選択してください</option>
+          {filteredBloodlines.map((bloodline) => (
+            <option
+              key={`${bloodline.species_id}-${bloodline.morph_id}-${bloodline.bloodline_id}`}
+              value={bloodline.bloodline_id}
+            >
+              {bloodline.bloodline_name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <div className={adminStyles.field}>
+        <span>ヘテロ</span>
+        <div className={adminStyles.stack}>
+          {hetFields.map((field, index) => (
+            <div key={field.id} className={adminStyles.formGrid}>
+              <label className={adminStyles.field}>
+                {index === 0 ? 'ヘテロ1' : `ヘテロ${index + 1}`}
+                <select
+                  {...register(`het_entries.${index}.morph_id` as const)}
+                  onChange={(event) => handleHetChange(index, event.target.value)}
+                >
+                  <option value="">選択してください</option>
+                  {recessiveMorphs.map((morph) => (
+                    <option key={`${morph.species_id}-${morph.morph_id}`} value={morph.morph_id}>
+                      {morph.morph_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ))}
+          {errors.het_entries?.message ? (
+            <p className={adminStyles.fieldError}>{errors.het_entries.message}</p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className={adminStyles.field}>
+        <span>Possヘテロ</span>
+        <div className={adminStyles.stack}>
+          {possibleHetFields.map((field, index) => (
+            <div key={field.id} className={adminStyles.formGrid}>
+              <label className={adminStyles.field}>
+                {index === 0 ? 'Possヘテロ1' : `Possヘテロ${index + 1}`}
+                <select
+                  {...register(`possible_het_entries.${index}.morph_id` as const)}
+                  onChange={(event) => handlePossibleHetChange(index, event.target.value)}
+                >
+                  <option value="">選択してください</option>
+                  {recessiveMorphs.map((morph) => (
+                    <option key={`${morph.species_id}-${morph.morph_id}`} value={morph.morph_id}>
+                      {morph.morph_name}
+                    </option>
+                  ))}
+                </select>
+                {errors.possible_het_entries?.[index]?.morph_id ? (
+                  <p className={adminStyles.fieldError}>{errors.possible_het_entries[index]?.morph_id?.message}</p>
+                ) : null}
+              </label>
+
+              <label className={adminStyles.field}>
+                Poss率(%)
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="1"
+                  {...register(`possible_het_entries.${index}.possible_het_percentage` as const)}
+                />
+                {errors.possible_het_entries?.[index]?.possible_het_percentage ? (
+                  <p className={adminStyles.fieldError}>
+                    {errors.possible_het_entries[index]?.possible_het_percentage?.message}
+                  </p>
+                ) : null}
+              </label>
+            </div>
+          ))}
+          {errors.possible_het_entries?.message ? (
+            <p className={adminStyles.fieldError}>{errors.possible_het_entries.message}</p>
+          ) : null}
+        </div>
+      </div>
+
+      <label className={adminStyles.field}>
+        遺伝性区分
+        <select disabled value={filteredMorphs.find((morph) => morph.morph_id === visualMorphId)?.inheritance_category ?? ''}>
+          <option value="">-</option>
+          {inheritanceCategoryOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className={adminStyles.field}>

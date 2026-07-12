@@ -1,5 +1,5 @@
-﻿import type { IndividualImage } from '../../../api/models/IndividualImage';
-import { StatusBanner, adminStyles } from '../../../shared/ui/admin';
+import type { IndividualImage } from '../../../api/models/IndividualImage';
+import { StatusBanner, adminStyles, confirmDeleteByKeyword } from '../../../shared/ui/admin';
 
 type Props = {
   images: IndividualImage[];
@@ -11,6 +11,11 @@ type Props = {
 };
 
 export const IndividualImageManager = ({ images, loading, error, onSetPrimary, onReplace, onDelete }: Props) => {
+  const handleDelete = async (imageId: number) => {
+    if (!confirmDeleteByKeyword()) return;
+    await onDelete(imageId);
+  };
+
   return (
     <div className={adminStyles.sectionPlain}>
       <h2>登録済み画像</h2>
@@ -43,7 +48,7 @@ export const IndividualImageManager = ({ images, loading, error, onSetPrimary, o
                       }}
                     />
                   </label>
-                  <button className={adminStyles.buttonDanger} type="button" onClick={() => void onDelete(image.image_id)}>
+                  <button className={adminStyles.buttonDanger} type="button" onClick={() => void handleDelete(image.image_id)}>
                     削除
                   </button>
                 </div>

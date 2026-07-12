@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+const hetEntrySchema = z.object({
+  morph_id: z.string().trim(),
+});
+
+const possibleHetEntrySchema = z.object({
+  morph_id: z.string().trim(),
+  possible_het_percentage: z.string().trim(),
+});
+
 export const individualFormSchema = z
   .object({
     species_id: z.string().trim().min(1, '種を選択してください'),
@@ -9,8 +18,10 @@ export const individualFormSchema = z
     pairing_id: z.string().trim(),
     male_parent_id: z.string().trim(),
     female_parent_id: z.string().trim(),
-    morph: z.string().trim(),
-    bloodline: z.string().trim(),
+    visual_morph_id: z.string().trim().min(1, 'モルフを選択してください'),
+    het_entries: z.array(hetEntrySchema),
+    possible_het_entries: z.array(possibleHetEntrySchema),
+    bloodline_id: z.string().trim(),
     gender_category: z.string().trim().min(1, '性別区分を選択してください'),
     breeding_category: z.string().trim().min(1, '繁殖区分を選択してください'),
     breeder: z.string().trim(),
@@ -52,6 +63,92 @@ export const individualFormSchema = z
         message: '自家繁殖のときはペアリング年度を選択してください',
       });
     }
+
+    if (values.breeding_category === '0' && !values.pairing_id) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['pairing_id'],
+        message: '自家繁殖のときはペアリングIDを選択してください',
+      });
+    }
+
+    const hetIds = values.het_entries
+      .map((entry) => entry.morph_id.trim())
+      .filter(Boolean);
+    const possibleHetIds = values.possible_het_entries
+      .map((entry) => entry.morph_id.trim())
+      .filter(Boolean);
+
+    const duplicatedHetIds = hetIds.filter((id, index) => hetIds.indexOf(id) !== index);
+    if (duplicatedHetIds.length > 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['het_entries'],
+        message: 'ヘテロに同じモルフは登録できません',
+      });
+    }
+
+    const duplicatedPossibleHetIds = possibleHetIds.filter((id, index) => possibleHetIds.indexOf(id) !== index);
+    if (duplicatedPossibleHetIds.length > 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['possible_het_entries'],
+        message: 'Possヘテロに同じモルフは登録できません',
+      });
+    }
+
+    const overlappingIds = hetIds.filter((id) => possibleHetIds.includes(id));
+    if (overlappingIds.length > 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['possible_het_entries'],
+        message: '同じモルフをヘテロとPossヘテロの両方に登録できません',
+      });
+    }
+
+    values.possible_het_entries.forEach((entry, index) => {
+      const morphId = entry.morph_id.trim();
+      const percentage = entry.possible_het_percentage.trim();
+
+      if (!morphId && !percentage) {
+        return;
+      }
+
+      if (!morphId) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['possible_het_entries', index, 'morph_id'],
+          message: 'Possヘテロのモルフを選択してください',
+        });
+      }
+
+      if (!percentage) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['possible_het_entries', index, 'possible_het_percentage'],
+          message: 'Possヘテロ率を入力してください',
+        });
+        return;
+      }
+
+      if (!/^\d+$/.test(percentage)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['possible_het_entries', index, 'possible_het_percentage'],
+          message: 'Possヘテロ率は0から100の整数で入力してください',
+        });
+        return;
+      }
+
+      const numericPercentage = Number(percentage);
+      if (numericPercentage < 0 || numericPercentage > 100) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['possible_het_entries', index, 'possible_het_percentage'],
+          message: 'Possヘテロ率は0から100で入力してください',
+        });
+      }
+    });
   });
 
 export type IndividualFormValues = z.infer<typeof individualFormSchema>;

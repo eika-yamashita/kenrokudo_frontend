@@ -9,6 +9,8 @@ import {
   adminStyles,
 } from '../../../shared/ui/admin';
 import { usePairingsQuery } from '../../pairings/hooks/usePairingQueries';
+import { useBloodlinesQuery } from '../../bloodlines/hooks/useBloodlineQueries';
+import { useMorphsQuery } from '../../morphs/hooks/useMorphQueries';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { ImageUploadPicker } from '../components/ImageUploadPicker';
 import { IndividualFormFields } from '../components/IndividualFormFields';
@@ -29,6 +31,8 @@ export const IndividualCreateScreen = () => {
   const location = useLocation();
   const speciesQuery = useSpeciesQuery();
   const pairingsQuery = usePairingsQuery();
+  const morphsQuery = useMorphsQuery();
+  const bloodlinesQuery = useBloodlinesQuery();
   const createMutation = useCreateIndividualMutation();
   const uploadImageMutation = useUploadIndividualImageMutation();
 
@@ -59,12 +63,17 @@ export const IndividualCreateScreen = () => {
   const errorMessage =
     speciesQuery.error?.message ||
     pairingsQuery.error?.message ||
+    morphsQuery.error?.message ||
+    bloodlinesQuery.error?.message ||
     createMutation.error?.message ||
     uploadImageMutation.error?.message;
 
   const isSaving = createMutation.isPending || uploadImageMutation.isPending;
-  const isLoading = speciesQuery.isLoading || pairingsQuery.isLoading;
+  const isLoading =
+    speciesQuery.isLoading || pairingsQuery.isLoading || morphsQuery.isLoading || bloodlinesQuery.isLoading;
   const pairings = useMemo(() => pairingsQuery.data ?? [], [pairingsQuery.data]);
+  const morphs = useMemo(() => morphsQuery.data ?? [], [morphsQuery.data]);
+  const bloodlines = useMemo(() => bloodlinesQuery.data ?? [], [bloodlinesQuery.data]);
   const selectedSpeciesId = form.watch('species_id');
   const speciesLabel = selectedSpeciesId ? getSpeciesLabel(selectedSpeciesId, speciesQuery.data ?? []) : '-';
   const listSearch = location.search;
@@ -135,7 +144,14 @@ export const IndividualCreateScreen = () => {
         />
 
         <div className={adminStyles.sectionPlain}>
-          <IndividualFormFields mode="create" form={form} speciesList={speciesQuery.data} pairingList={pairings} />
+          <IndividualFormFields
+            mode="create"
+            form={form}
+            speciesList={speciesQuery.data}
+            pairingList={pairings}
+            morphList={morphs}
+            bloodlineList={bloodlines}
+          />
         </div>
       </form>
 

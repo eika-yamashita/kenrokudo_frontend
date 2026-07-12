@@ -9,6 +9,8 @@ import {
   adminStyles,
 } from '../../../shared/ui/admin';
 import { usePairingsQuery } from '../../pairings/hooks/usePairingQueries';
+import { useBloodlinesQuery } from '../../bloodlines/hooks/useBloodlineQueries';
+import { useMorphsQuery } from '../../morphs/hooks/useMorphQueries';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { getSpeciesLabel } from '../../species/utils/getSpeciesLabel';
 import { ImageUploadPicker } from '../components/ImageUploadPicker';
@@ -40,6 +42,8 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
   const imagesQuery = useIndividualImagesQuery(speciesId, id);
   const speciesQuery = useSpeciesQuery();
   const pairingsQuery = usePairingsQuery();
+  const morphsQuery = useMorphsQuery();
+  const bloodlinesQuery = useBloodlinesQuery();
   const updateMutation = useUpdateIndividualMutation();
   const uploadImageMutation = useUploadIndividualImageMutation();
   const replaceImageMutation = useReplaceIndividualImageMutation();
@@ -71,12 +75,19 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
   }, [newFiles]);
 
   const isLoading =
-    individualQuery.isLoading || imagesQuery.isLoading || speciesQuery.isLoading || pairingsQuery.isLoading;
+    individualQuery.isLoading ||
+    imagesQuery.isLoading ||
+    speciesQuery.isLoading ||
+    pairingsQuery.isLoading ||
+    morphsQuery.isLoading ||
+    bloodlinesQuery.isLoading;
   const errorMessage =
     individualQuery.error?.message ||
     imagesQuery.error?.message ||
     speciesQuery.error?.message ||
     pairingsQuery.error?.message ||
+    morphsQuery.error?.message ||
+    bloodlinesQuery.error?.message ||
     updateMutation.error?.message ||
     uploadImageMutation.error?.message ||
     replaceImageMutation.error?.message ||
@@ -145,7 +156,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
     return <StatusBanner>読み込み中...</StatusBanner>;
   }
 
-  if (!individualQuery.data || !speciesQuery.data || !pairingsQuery.data) {
+  if (!individualQuery.data || !speciesQuery.data || !pairingsQuery.data || !morphsQuery.data || !bloodlinesQuery.data) {
     return <StatusBanner tone="error">必要なデータを読み込めませんでした</StatusBanner>;
   }
 
@@ -194,6 +205,8 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
             form={form}
             speciesList={speciesQuery.data}
             pairingList={pairingsQuery.data}
+            morphList={morphsQuery.data}
+            bloodlineList={bloodlinesQuery.data}
           />
         </div>
 

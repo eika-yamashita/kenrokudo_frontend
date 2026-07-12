@@ -1,5 +1,5 @@
 .page {
-  padding: 0 24px 24px;
+  padding: 12px 24px 24px;
   animation: contentIn 460ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -246,6 +246,14 @@
   color: var(--text-main);
 }
 
+.formActions + .status {
+  margin-top: 10px;
+}
+
+.stack + .status {
+  margin-top: 10px;
+}
+
 .statusError {
   border-color: #f2c9c4;
   background: #fff4f3;
@@ -328,22 +336,23 @@
 
 .menuCardButton {
   appearance: none;
-  min-height: 128px;
-  padding: 24px 20px;
-  border: 1px solid var(--line-soft);
-  border-radius: 18px;
+  min-height: 148px;
+  padding: 28px 24px;
+  border: 1px solid #cfd6da;
+  border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(247, 247, 245, 0.98)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.99), rgba(241, 241, 237, 0.98)),
     #ffffff;
   color: var(--text-main);
   box-shadow:
-    0 10px 24px rgba(25, 25, 20, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    0 16px 32px rgba(25, 25, 20, 0.12),
+    0 3px 0 rgba(177, 184, 190, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
   cursor: pointer;
   font: inherit;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-size: clamp(1.18rem, 1.5vw, 1.42rem);
+  font-weight: 800;
+  letter-spacing: 0.015em;
   text-align: left;
   transition:
     transform 0.16s ease,
@@ -353,11 +362,20 @@
 }
 
 .menuCardButton:hover {
-  transform: translateY(-2px);
-  border-color: #cfd6da;
+  transform: translateY(-3px);
+  border-color: #bcc5ca;
   box-shadow:
-    0 14px 28px rgba(25, 25, 20, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    0 20px 36px rgba(25, 25, 20, 0.16),
+    0 4px 0 rgba(177, 184, 190, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+.menuCardButton:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 8px 18px rgba(25, 25, 20, 0.14),
+    0 1px 0 rgba(177, 184, 190, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .menuCardButton:focus-visible {
@@ -821,8 +839,9 @@
   }
 
   .menuCardButton {
-    min-height: 110px;
-    padding: 20px 18px;
+    min-height: 118px;
+    padding: 22px 18px;
+    font-size: 1.08rem;
   }
 
   .imageThumbButton {

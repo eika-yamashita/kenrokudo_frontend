@@ -1,3 +1,5 @@
+import type { IndividualMorph } from './IndividualMorph';
+
 export interface Individual {
   species_id: string;
   fiscal_year: number;
@@ -6,8 +8,7 @@ export interface Individual {
   pairing_id?: string;
   male_parent_id?: string;
   female_parent_id?: string;
-  morph?: string;
-  bloodline?: string;
+  morph_entries?: IndividualMorph[];
   gender_category?: string;
   breeding_category?: string;
   breeder?: string;

@@ -27,6 +27,19 @@ describe('apiClient', () => {
     await expect(apiClient.get('/test', 'failed')).rejects.toEqual(new ApiError('bad request', 400));
   });
 
+  it('surfaces JSON detail messages', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ detail: '参照中のため削除できません' }), {
+        status: 409,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+
+    await expect(apiClient.get('/test', 'failed')).rejects.toEqual(
+      new ApiError('参照中のため削除できません', 409)
+    );
+  });
+
   it('falls back to provided message when the response body is empty', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(new Response('', { status: 500 }));
 

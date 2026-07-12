@@ -11,6 +11,7 @@ import { formatGenderCategory } from '../../../utils/genderCategory';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { getSpeciesLabel } from '../../species/utils/getSpeciesLabel';
 import { useIndividualImagesQuery, useIndividualQuery } from '../hooks/useIndividualQueries';
+import { getIndividualMorphDisplay } from '../utils/getIndividualMorphDisplay';
 
 type Props = {
   speciesId: string;
@@ -71,6 +72,7 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
   const showBreedingDetails = individual.breeding_category === '0';
   const showSalesTo = individual.sales_category === '2';
   const showSalesPricing = individual.sales_category === '1' || individual.sales_category === '2';
+  const visualMorph = individual.morph_entries?.find((entry) => entry.expression_category === '0');
   const fieldRows = [
     ['登録年度', 'fiscal_year'],
     ['繁殖区分', 'breeding_category'],
@@ -127,6 +129,8 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
       }
       return `${individual.pairing_fiscal_year} / ${individual.pairing_id}`;
     }
+    if (key === 'morph') return getIndividualMorphDisplay(individual) || '-';
+    if (key === 'bloodline') return visualMorph?.bloodline_name || '-';
     if (key === 'gender_category') return formatGenderCategory(value);
     if (key === 'breeding_category') return value === '1' ? '購入個体' : '自家繁殖';
     if (key === 'sales_category') {
@@ -232,7 +236,7 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
             {fieldRows.map(([label, key]) => (
               <div key={key} className={adminStyles.detailItem}>
                 <dt>{label}</dt>
-                <dd>{renderValue(key, key === 'pairing_key' ? undefined : individual[key])}</dd>
+                <dd>{renderValue(key, key === 'pairing_key' || key === 'morph' || key === 'bloodline' ? undefined : individual[key])}</dd>
               </div>
             ))}
           </dl>
