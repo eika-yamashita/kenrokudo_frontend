@@ -17,6 +17,9 @@ export const AdminMenuPage = () => {
         <button className={adminStyles.menuCardButton} onClick={() => navigate('/admin/pairings')}>
           ペアリング管理
         </button>
+        <button className={adminStyles.menuCardButton} onClick={() => navigate('/admin/events')}>
+          出店イベント管理
+        </button>
         <button className={adminStyles.menuCardButton} onClick={() => navigate('/admin/masters')}>
           マスタ管理
         </button>

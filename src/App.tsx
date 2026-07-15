@@ -18,6 +18,8 @@ import { IndividualCreatePage } from './pages/IndividualCreatePage';
 import { PairingListPage } from './pages/PairingListPage';
 import { PairingCreatePage } from './pages/PairingCreatePage';
 import { PairingEditorPage } from './pages/PairingEditorPage';
+import { EventListPage } from './pages/EventListPage';
+import { EventUpsertPage } from './pages/EventUpsertPage';
 import './styles/appShell.css';
 
 function AppContent() {
@@ -68,6 +70,9 @@ function AppContent() {
           <Route path="/admin/pairings" element={<PairingListPage />} />
           <Route path="/admin/pairings/new" element={<PairingCreatePage />} />
           <Route path="/admin/pairings/edit/:species_id/:fiscal_year/:pairing_id" element={<PairingEditorPage />} />
+          <Route path="/admin/events" element={<EventListPage />} />
+          <Route path="/admin/events/new" element={<EventUpsertPage mode="create" />} />
+          <Route path="/admin/events/edit/:event_id" element={<EventUpsertPage mode="edit" />} />
         </Routes>
       </main>
     </div>
