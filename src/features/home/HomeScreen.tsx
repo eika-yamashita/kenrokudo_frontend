@@ -64,7 +64,7 @@ export const HomeScreen = () => {
 
       <footer className={styles.footer}>
         <nav className={styles.contactList} aria-label="Contact information">
-          <a href="https://line.me/R/ti/p/@eub2015" target="_blank" rel="noreferrer">
+          <a href="https://line.me/R/ti/p/@kenrokudo" target="_blank" rel="noreferrer">
             LINE
           </a>
           <a href="tel:09020156826">TEL</a>

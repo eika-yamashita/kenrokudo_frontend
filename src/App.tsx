@@ -37,7 +37,8 @@ function AppContent() {
     <div className="appShell">
       <header className={headerClassName}>
         <Link className={brandLinkClassName} to={brandLinkTo}>
-          絢禄堂 -KENROKUDO-
+          <span>絢禄堂</span>
+          <span>-KENROKUDO-</span>
         </Link>
       </header>
       <main className={mainClassName}>

@@ -38,12 +38,14 @@
 
 .brandLink {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
   color: var(--text-main);
   text-decoration: none;
   font-size: clamp(1.08rem, 1.35vw, 1.2rem);
   font-weight: 600;
+  line-height: 1.08;
   letter-spacing: 0.01em;
 }
 
@@ -64,7 +66,7 @@
 
 .brandLinkAdmin::after {
   content: 'Admin';
-  margin-left: 6px;
+  margin-top: 4px;
   padding: 1px 6px;
   border: 1px solid var(--line-hard);
   border-radius: 6px;
