@@ -16,7 +16,7 @@ export const getIndividualMorphDisplay = (individual: Pick<Individual, 'morph_en
   const visual = entries.find((entry) => entry.expression_category === EXPRESSION_VISUAL);
   const parts: string[] = [];
   if (visual?.morph_name) {
-    parts.push(visual.bloodline_name ? `${visual.morph_name} / ${visual.bloodline_name}` : visual.morph_name);
+    parts.push(visual.bloodline_name || visual.morph_name);
   }
 
   entries

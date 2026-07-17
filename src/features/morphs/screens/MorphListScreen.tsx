@@ -68,6 +68,7 @@ export const MorphListScreen = () => {
           { key: 'species_id', header: '種', renderCell: (morph) => speciesLabelMap.get(morph.species_id) || morph.species_id },
           { key: 'morph_id', header: 'モルフID', renderCell: (morph) => morph.morph_id },
           { key: 'morph_name', header: 'モルフ名', renderCell: (morph) => morph.morph_name },
+          { key: 'morph_type', header: '種別', renderCell: (morph) => morph.morph_type === 'COMBO' ? 'コンボ' : 'シングル' },
         ]}
         rows={morphsQuery.data ?? []}
         emptyMessage="モルフマスタはまだありません"

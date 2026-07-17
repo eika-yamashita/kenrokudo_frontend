@@ -80,12 +80,26 @@ export const MorphDetailScreen = ({ speciesId, morphId }: Props) => {
             <dd>{morphQuery.data.morph_name}</dd>
           </div>
           <div className={adminStyles.detailItem}>
-            <dt>遺伝性区分</dt>
-            <dd>
-              {inheritanceCategoryLabels[morphQuery.data.inheritance_category] ??
-                morphQuery.data.inheritance_category}
-            </dd>
+            <dt>モルフ種別</dt>
+            <dd>{morphQuery.data.morph_type === 'COMBO' ? 'コンボ' : 'シングル'}</dd>
           </div>
+          {morphQuery.data.morph_type === 'SINGLE' ? (
+            <div className={adminStyles.detailItem}>
+              <dt>遺伝性区分</dt>
+              <dd>{inheritanceCategoryLabels[morphQuery.data.inheritance_category ?? ''] ?? '-'}</dd>
+            </div>
+          ) : (
+            <>
+              <div className={adminStyles.detailItem}>
+                <dt>表示優先度</dt>
+                <dd>{morphQuery.data.display_priority ?? 0}</dd>
+              </div>
+              <div className={adminStyles.detailItem}>
+                <dt>構成モルフ</dt>
+                <dd>{(morphQuery.data.components ?? []).map((component) => component.component_morph_name || component.component_morph_id).join(' + ') || '-'}</dd>
+              </div>
+            </>
+          )}
         </dl>
       </div>
     </AdminPageLayout>

@@ -106,6 +106,14 @@ export const individualFormSchema = z
       });
     }
 
+    if (hetIds.includes(values.visual_morph_id) || possibleHetIds.includes(values.visual_morph_id)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['visual_morph_id'],
+        message: '同じモルフをモルフとヘテロ／Possヘテロへ重複登録できません',
+      });
+    }
+
     values.possible_het_entries.forEach((entry, index) => {
       const morphId = entry.morph_id.trim();
       const percentage = entry.possible_het_percentage.trim();

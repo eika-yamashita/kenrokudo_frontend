@@ -119,7 +119,7 @@ export const IndividualFormFields = ({
   );
 
   const recessiveMorphs = useMemo(
-    () => filteredMorphs.filter((morph) => morph.inheritance_category === '1'),
+    () => filteredMorphs.filter((morph) => (morph.morph_type ?? 'SINGLE') === 'SINGLE' && morph.inheritance_category === '1'),
     [filteredMorphs]
   );
 
@@ -397,6 +397,7 @@ export const IndividualFormFields = ({
           {filteredMorphs.map((morph) => (
             <option key={`${morph.species_id}-${morph.morph_id}`} value={morph.morph_id}>
               {morph.morph_name}
+              {` (${morph.morph_type === 'COMBO' ? 'コンボ' : 'シングル'})`}
             </option>
           ))}
         </select>
