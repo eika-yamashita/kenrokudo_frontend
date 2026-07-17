@@ -172,7 +172,6 @@ export const BloodlineUpsertScreen = (props: Props) => {
               {(morphsQuery.data ?? []).map((morph) => (
                 <option key={`${morph.species_id}-${morph.morph_id}`} value={morph.morph_id}>
                   {morph.morph_name}
-                  {` (${morph.morph_type === 'COMBO' ? 'コンボ' : 'シングル'})`}
                 </option>
               ))}
             </select>

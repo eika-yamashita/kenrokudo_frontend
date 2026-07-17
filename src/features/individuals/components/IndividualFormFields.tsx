@@ -25,13 +25,6 @@ const fiscalYearOptions = Array.from({ length: currentYear - 2021 + 1 }, (_, ind
   String(currentYear - index)
 );
 
-const inheritanceCategoryOptions = [
-  { value: '0', label: '多因性遺伝' },
-  { value: '1', label: '劣性遺伝' },
-  { value: '2', label: '優勢遺伝' },
-  { value: '3', label: '共優勢遺伝' },
-];
-
 type Props = {
   mode: 'create' | 'edit';
   form: UseFormReturn<IndividualFormValues>;
@@ -397,7 +390,6 @@ export const IndividualFormFields = ({
           {filteredMorphs.map((morph) => (
             <option key={`${morph.species_id}-${morph.morph_id}`} value={morph.morph_id}>
               {morph.morph_name}
-              {` (${morph.morph_type === 'COMBO' ? 'コンボ' : 'シングル'})`}
             </option>
           ))}
         </select>
@@ -425,12 +417,11 @@ export const IndividualFormFields = ({
       </label>
 
       <div className={adminStyles.field}>
-        <span>ヘテロ</span>
         <div className={adminStyles.stack}>
           {hetFields.map((field, index) => (
             <div key={field.id} className={adminStyles.formGrid}>
               <label className={adminStyles.field}>
-                {index === 0 ? 'ヘテロ1' : `ヘテロ${index + 1}`}
+                {index === 0 ? 'ヘテロ' : `ヘテロ${index + 1}`}
                 <select
                   {...register(`het_entries.${index}.morph_id` as const)}
                   onChange={(event) => handleHetChange(index, event.target.value)}
@@ -452,12 +443,11 @@ export const IndividualFormFields = ({
       </div>
 
       <div className={adminStyles.field}>
-        <span>Possヘテロ</span>
         <div className={adminStyles.stack}>
           {possibleHetFields.map((field, index) => (
             <div key={field.id} className={adminStyles.formGrid}>
               <label className={adminStyles.field}>
-                {index === 0 ? 'Possヘテロ1' : `Possヘテロ${index + 1}`}
+                {index === 0 ? 'Possヘテロ' : `Possヘテロ${index + 1}`}
                 <select
                   {...register(`possible_het_entries.${index}.morph_id` as const)}
                   onChange={(event) => handlePossibleHetChange(index, event.target.value)}
@@ -496,18 +486,6 @@ export const IndividualFormFields = ({
           ) : null}
         </div>
       </div>
-
-      <label className={adminStyles.field}>
-        遺伝性区分
-        <select disabled value={filteredMorphs.find((morph) => morph.morph_id === visualMorphId)?.inheritance_category ?? ''}>
-          <option value="">-</option>
-          {inheritanceCategoryOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
 
       <label className={adminStyles.field}>
         性別区分

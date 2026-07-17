@@ -155,7 +155,7 @@ describe('IndividualCreateScreen', () => {
 
     expect(screen.queryByLabelText('ヘテロ2')).not.toBeInTheDocument();
 
-    await userEvent.selectOptions(screen.getByLabelText('ヘテロ1'), '002');
+    await userEvent.selectOptions(screen.getByLabelText('ヘテロ'), '002');
 
     expect(await screen.findByLabelText('ヘテロ2')).toBeInTheDocument();
   });

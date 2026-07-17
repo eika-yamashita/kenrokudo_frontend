@@ -6,6 +6,7 @@
   background: var(--page-bg);
   color: var(--text-main);
   overflow-x: hidden;
+  overflow-y: scroll;
   overscroll-behavior-y: auto;
 }
 
@@ -36,4 +37,8 @@ body,
 #root {
   height: 100%;
   min-height: 100%;
+}
+
+html {
+  scrollbar-gutter: stable;
 }

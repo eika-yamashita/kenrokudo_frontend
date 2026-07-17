@@ -83,7 +83,6 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
           ['メス親ID', 'female_parent_id'],
         ] as const)
       : []),
-    ['モルフ', 'morph'],
     ['性別', 'gender_category'],
     ['ブリーダー', 'breeder'],
     ['ハッチ日', 'hatch_date'],
@@ -112,6 +111,14 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
   ] as const;
 
   const formatValue = (key: string, raw: unknown) => {
+    if (key === 'morph') return getIndividualMorphDisplay(individual) || '-';
+    if (key === 'pairing_key') {
+      if (!individual.pairing_fiscal_year || !individual.pairing_id) {
+        return '-';
+      }
+      return `${individual.pairing_fiscal_year} / ${individual.pairing_id}`;
+    }
+
     if (raw === null || raw === undefined || raw === '') {
       return '-';
     }
@@ -121,13 +128,6 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
     if (key === 'fiscal_year' || key === 'pairing_fiscal_year') {
       return value;
     }
-    if (key === 'pairing_key') {
-      if (!individual.pairing_fiscal_year || !individual.pairing_id) {
-        return '-';
-      }
-      return `${individual.pairing_fiscal_year} / ${individual.pairing_id}`;
-    }
-    if (key === 'morph') return getIndividualMorphDisplay(individual) || '-';
     if (key === 'gender_category') return formatGenderCategory(value);
     if (key === 'breeding_category') return value === '1' ? '購入個体' : '自家繁殖';
     if (key === 'sales_category') {
@@ -166,7 +166,6 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
     <AdminPageLayout>
       <PageHeader
         title={`${speciesLabel} / ${individual.id}`}
-        stickyActions
         actions={
           <div className={adminStyles.inlineActions}>
             <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate(`/admin/individuals${listSearch}`)}>
@@ -226,6 +225,9 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
               ) : null}
             </div>
           )}
+          <div className={adminStyles.individualMorphSummary}>
+            {getIndividualMorphDisplay(individual) || '-'}
+          </div>
         </div>
 
         <div className={adminStyles.sectionPlain}>
@@ -233,7 +235,7 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
             {fieldRows.map(([label, key]) => (
               <div key={key} className={adminStyles.detailItem}>
                 <dt>{label}</dt>
-                <dd>{renderValue(key, key === 'pairing_key' || key === 'morph' ? undefined : individual[key])}</dd>
+                <dd>{renderValue(key, key === 'pairing_key' ? undefined : individual[key])}</dd>
               </div>
             ))}
           </dl>

@@ -34,7 +34,7 @@ function AppContent() {
   const brandLinkTo = isAdminRoute ? '/admin' : '/';
 
   return (
-    <div className="appShell">
+    <div className={`appShell ${isAdminRoute ? 'appShellAdmin' : ''}`}>
       <header className={headerClassName}>
         <Link className={brandLinkClassName} to={brandLinkTo}>
           <span>絢禄堂</span>

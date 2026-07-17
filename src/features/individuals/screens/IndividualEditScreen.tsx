@@ -164,7 +164,6 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
     <AdminPageLayout>
       <PageHeader
         title={`${getSpeciesLabel(speciesId, speciesQuery.data)} / ${individualQuery.data.id}`}
-        stickyActions
         actions={
           <div className={adminStyles.inlineActions}>
             <button

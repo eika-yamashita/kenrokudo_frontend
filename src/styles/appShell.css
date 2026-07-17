@@ -11,6 +11,10 @@
   overflow-x: hidden;
 }
 
+.appShellAdmin {
+  background: #ffffff;
+}
+
 .appHeader {
   display: flex;
   align-items: center;
@@ -33,7 +37,8 @@
 }
 
 .appHeaderAdmin {
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
+  backdrop-filter: none;
 }
 
 .brandLink {
@@ -65,14 +70,7 @@
 }
 
 .brandLinkAdmin::after {
-  content: 'Admin';
-  margin-top: 4px;
-  padding: 1px 6px;
-  border: 1px solid var(--line-hard);
-  border-radius: 6px;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
+  content: none;
 }
 
 .appMain {

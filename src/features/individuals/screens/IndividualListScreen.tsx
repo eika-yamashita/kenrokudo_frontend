@@ -258,7 +258,8 @@ export const IndividualListScreen = () => {
         columns={[
           {
             key: 'image',
-            header: '画像',
+            header: '',
+            className: adminStyles.tableImageCell,
             renderCell: (individual) => (
               <IndividualThumbnailCell speciesId={individual.species_id} id={individual.id} density="compact" />
             ),

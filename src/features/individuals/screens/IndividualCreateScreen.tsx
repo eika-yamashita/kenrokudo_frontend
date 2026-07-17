@@ -117,8 +117,7 @@ export const IndividualCreateScreen = () => {
   return (
     <AdminPageLayout>
       <PageHeader
-        title={` ${speciesLabel} / 新規登録`}
-        stickyActions
+        title={`${speciesLabel} / 新規登録`}
         actions={
           <div className={adminStyles.inlineActions}>
             <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate(`/admin/individuals${listSearch}`)}>

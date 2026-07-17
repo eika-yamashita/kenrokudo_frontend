@@ -16,10 +16,6 @@ export const BloodlineListScreen = () => {
   const morphsQuery = useMorphSearchQuery({ speciesId });
   const bloodlinesQuery = useBloodlineSearchQuery({ speciesId, morphId: morphId || undefined });
 
-  const speciesLabelMap = useMemo(
-    () => new Map(speciesList.map((species) => [species.species_id, species.common_name || species.japanese_name])),
-    [speciesList]
-  );
   const morphLabelMap = useMemo(
     () => new Map((morphsQuery.data ?? []).map((morph) => [morph.morph_id, morph.morph_name])),
     [morphsQuery.data]
@@ -96,8 +92,7 @@ export const BloodlineListScreen = () => {
             <option value="">すべて</option>
             {(morphsQuery.data ?? []).map((morph) => (
               <option key={`${morph.species_id}-${morph.morph_id}`} value={morph.morph_id}>
-              {morph.morph_name}
-              {` (${morph.morph_type === 'COMBO' ? 'コンボ' : 'シングル'})`}
+                {morph.morph_name}
               </option>
             ))}
           </select>
@@ -106,18 +101,12 @@ export const BloodlineListScreen = () => {
 
       <DataTable<BloodlineMaster>
         columns={[
-          {
-            key: 'species_id',
-            header: '種',
-            renderCell: (bloodline) => speciesLabelMap.get(bloodline.species_id) || bloodline.species_id,
-          },
+          { key: 'bloodline_name', header: '血統', renderCell: (bloodline) => bloodline.bloodline_name },
           {
             key: 'morph_id',
             header: 'モルフ',
             renderCell: (bloodline) => morphLabelMap.get(bloodline.morph_id) || bloodline.morph_id,
           },
-          { key: 'bloodline_id', header: '血統ID', renderCell: (bloodline) => bloodline.bloodline_id },
-          { key: 'bloodline_name', header: '血統名', renderCell: (bloodline) => bloodline.bloodline_name },
         ]}
         rows={bloodlinesQuery.data ?? []}
         emptyMessage="血統マスタはまだありません"

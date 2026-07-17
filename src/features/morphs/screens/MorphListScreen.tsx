@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { MorphMaster } from '../../../api/models/MorphMaster';
 import { AdminPageLayout, DataTable, PageHeader, StatusBanner, adminStyles } from '../../../shared/ui/admin';
@@ -12,12 +11,6 @@ export const MorphListScreen = () => {
   const speciesList = speciesQuery.data ?? [];
   const speciesId = searchParams.get('speciesId') ?? speciesList[0]?.species_id ?? '';
   const morphsQuery = useMorphSearchQuery({ speciesId });
-
-  const speciesLabelMap = useMemo(
-    () =>
-      new Map(speciesList.map((species) => [species.species_id, species.common_name || species.japanese_name])),
-    [speciesList]
-  );
 
   if (speciesQuery.isLoading || morphsQuery.isLoading) {
     return <StatusBanner>読み込み中...</StatusBanner>;
@@ -65,7 +58,6 @@ export const MorphListScreen = () => {
 
       <DataTable<MorphMaster>
         columns={[
-          { key: 'species_id', header: '種', renderCell: (morph) => speciesLabelMap.get(morph.species_id) || morph.species_id },
           { key: 'morph_id', header: 'モルフID', renderCell: (morph) => morph.morph_id },
           { key: 'morph_name', header: 'モルフ名', renderCell: (morph) => morph.morph_name },
           { key: 'morph_type', header: '種別', renderCell: (morph) => morph.morph_type === 'COMBO' ? 'コンボ' : 'シングル' },
