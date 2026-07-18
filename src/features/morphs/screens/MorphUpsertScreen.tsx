@@ -27,6 +27,7 @@ const inheritanceCategoryOptions = [
   { value: '1', label: '劣性遺伝' },
   { value: '2', label: '優性遺伝' },
   { value: '3', label: '共優性遺伝' },
+  { value: '9', label: '該当なし' },
 ];
 
 const emptyComponent = (sortOrder: number): MorphComponent => ({

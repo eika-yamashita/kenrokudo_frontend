@@ -128,13 +128,15 @@ describe('IndividualCreateScreen', () => {
     await waitFor(() => expect(hatchDateInput.value).toBe(''));
   });
 
-  it('shows pairing fiscal year only for self-breeding and syncs it from fiscal year', async () => {
+  it('allows self-breeding registration before pairing information is selected', async () => {
     render(<IndividualCreateScreen />);
 
     const pairingFiscalYear = screen.getByLabelText('ペアリング年度') as HTMLSelectElement;
-    expect(pairingFiscalYear.value).toBe('2026');
+    expect(pairingFiscalYear.value).toBe('');
+    expect(screen.getByRole('option', { name: /2026 \/ A/ })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /2025 \/ B/ })).toBeInTheDocument();
 
-    await userEvent.selectOptions(screen.getByLabelText('登録年度'), '2025');
+    await userEvent.selectOptions(pairingFiscalYear, '2025');
     await waitFor(() => expect(pairingFiscalYear.value).toBe('2025'));
 
     expect(screen.getByRole('option', { name: /2025 \/ B/ })).toBeInTheDocument();
@@ -145,7 +147,7 @@ describe('IndividualCreateScreen', () => {
     expect(screen.queryByLabelText('ペアリングID')).not.toBeInTheDocument();
 
     await userEvent.selectOptions(screen.getByLabelText('繁殖区分'), '0');
-    await waitFor(() => expect((screen.getByLabelText('ペアリング年度') as HTMLSelectElement).value).toBe('2025'));
+    await waitFor(() => expect((screen.getByLabelText('ペアリング年度') as HTMLSelectElement).value).toBe(''));
     const pairingIdSelect = screen.getByText('ペアリングID').closest('label')?.querySelector('select');
     expect(pairingIdSelect).toHaveValue('');
   });

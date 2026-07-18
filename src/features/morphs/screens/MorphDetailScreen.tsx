@@ -13,6 +13,7 @@ const inheritanceCategoryLabels: Record<string, string> = {
   '1': '劣性遺伝',
   '2': '優勢遺伝',
   '3': '共優勢遺伝',
+  '9': '該当なし',
 };
 
 export const MorphDetailScreen = ({ speciesId, morphId }: Props) => {

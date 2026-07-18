@@ -55,11 +55,23 @@ describe('individualFormSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('requires pairing id for self-breeding individuals', () => {
+  it('allows self-breeding individuals without pairing or parent information', () => {
     const values = {
       ...createEmptyIndividualFormValues(),
       species_id: 'leo',
       pairing_id: '',
+      hatch_date: '2026-04-08',
+      visual_morph_id: '001',
+    };
+
+    expect(individualFormSchema.safeParse(values).success).toBe(true);
+  });
+
+  it('requires pairing id when a pairing fiscal year is selected', () => {
+    const values = {
+      ...createEmptyIndividualFormValues(),
+      species_id: 'leo',
+      pairing_fiscal_year: '2026',
       hatch_date: '2026-04-08',
       visual_morph_id: '001',
     };

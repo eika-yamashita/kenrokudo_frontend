@@ -56,19 +56,11 @@ export const individualFormSchema = z
       });
     }
 
-    if (values.breeding_category === '0' && !values.pairing_fiscal_year) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['pairing_fiscal_year'],
-        message: '自家繁殖のときはペアリング年度を選択してください',
-      });
-    }
-
-    if (values.breeding_category === '0' && !values.pairing_id) {
+    if (values.pairing_fiscal_year && !values.pairing_id) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['pairing_id'],
-        message: '自家繁殖のときはペアリングIDを選択してください',
+        message: 'ペアリングIDを選択してください',
       });
     }
 

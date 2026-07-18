@@ -69,7 +69,6 @@ export const IndividualFormFields = ({
   });
 
   const speciesId = watch('species_id');
-  const fiscalYear = watch('fiscal_year');
   const breedingCategory = watch('breeding_category');
   const pairingFiscalYear = watch('pairing_fiscal_year');
   const pairingId = watch('pairing_id');
@@ -220,7 +219,7 @@ export const IndividualFormFields = ({
               {...register('species_id')}
               onChange={(event) => {
                 setValue('species_id', event.target.value, { shouldDirty: true, shouldValidate: true });
-                setValue('pairing_fiscal_year', fiscalYear, { shouldDirty: true, shouldValidate: true });
+                setValue('pairing_fiscal_year', '', { shouldDirty: true, shouldValidate: true });
                 clearPairingSelection();
                 clearMorphSelections();
               }}
@@ -242,8 +241,6 @@ export const IndividualFormFields = ({
               onChange={(event) => {
                 const value = event.target.value;
                 setValue('fiscal_year', value, { shouldDirty: true, shouldValidate: true });
-                setValue('pairing_fiscal_year', value, { shouldDirty: true, shouldValidate: true });
-                clearPairingSelection();
               }}
             >
               {fiscalYearOptions.map((year) => (
@@ -280,7 +277,8 @@ export const IndividualFormFields = ({
             }
 
             setValue('breeder', '自家繁殖', { shouldDirty: true });
-            setValue('pairing_fiscal_year', fiscalYear, { shouldDirty: true, shouldValidate: true });
+            setValue('pairing_fiscal_year', '', { shouldDirty: true, shouldValidate: true });
+            clearPairingSelection();
             setValue('hatch_date', new Date().toISOString().slice(0, 10), {
               shouldDirty: true,
               shouldValidate: true,
@@ -319,6 +317,7 @@ export const IndividualFormFields = ({
           <label className={adminStyles.field}>
             ペアリング年度
             <select value={pairingFiscalYear} onChange={(event) => handlePairingFiscalYearChange(event.target.value)}>
+              <option value="">選択してください</option>
               {fiscalYearOptions.map((year) => (
                 <option key={year} value={year}>
                   {year}

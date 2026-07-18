@@ -27,7 +27,7 @@ export const createEmptyIndividualFormValues = (): IndividualFormValues => ({
   species_id: '',
   fiscal_year: currentYear(),
   id: '',
-  pairing_fiscal_year: currentYear(),
+  pairing_fiscal_year: '',
   pairing_id: '',
   male_parent_id: '',
   female_parent_id: '',
