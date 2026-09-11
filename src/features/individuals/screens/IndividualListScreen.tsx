@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useRef } from 'react';
 import type { Individual } from '../../../api/models/Individual';
 import { AdminPageLayout, DataTable, PageHeader, StatusBanner, adminStyles } from '../../../shared/ui/admin';
 import {
@@ -12,9 +13,13 @@ import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { IndividualThumbnailCell } from '../components/IndividualThumbnailCell';
 import { useIndividualSearchQuery } from '../hooks/useIndividualQueries';
 import { getIndividualMorphDisplay } from '../utils/getIndividualMorphDisplay';
+import { downloadIndividualCsv } from '../utils/individualCsv';
 
 const DEFAULT_SPECIES_ID = '0001';
 const DEFAULT_FISCAL_YEAR = new Date().getFullYear();
+
+const getIndividualKey = (individual: Pick<Individual, 'species_id' | 'id'>) =>
+  `${individual.species_id}\u0000${individual.id}`;
 
 const createYearOptions = (startYear: number, endYear: number) => {
   const from = Math.min(startYear, endYear);
@@ -60,6 +65,9 @@ export const IndividualListScreen = () => {
   const requestedDetailOpen = parseBooleanFlagParam(searchParams.get('detail'));
   const [draftMorph, setDraftMorph] = useState(appliedMorph);
   const [successMessage] = useState(() => getSuccessMessage(location.state));
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
+  const [exportError, setExportError] = useState('');
+  const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
 
   const speciesList = speciesQuery.data ?? [];
   const defaultSpeciesId =
@@ -73,6 +81,10 @@ export const IndividualListScreen = () => {
     fiscalYear: requestedFiscalYear,
     morph: appliedMorph || undefined,
   });
+  const individuals = individualsQuery.data ?? [];
+  const selectedIndividuals = individuals.filter((individual) => selectedKeys.has(getIndividualKey(individual)));
+  const allSelected = individuals.length > 0 && selectedIndividuals.length === individuals.length;
+  const partiallySelected = selectedIndividuals.length > 0 && !allSelected;
 
   const yearOptions = useMemo(() => createYearOptions(2022, DEFAULT_FISCAL_YEAR), []);
   const currentSearch = createListSearch({
@@ -85,6 +97,17 @@ export const IndividualListScreen = () => {
   useEffect(() => {
     setDraftMorph(appliedMorph);
   }, [appliedMorph]);
+
+  useEffect(() => {
+    setSelectedKeys(new Set());
+    setExportError('');
+  }, [effectiveSpeciesId, requestedFiscalYear, appliedMorph]);
+
+  useEffect(() => {
+    if (selectAllCheckboxRef.current) {
+      selectAllCheckboxRef.current.indeterminate = partiallySelected;
+    }
+  }, [partiallySelected]);
 
   useEffect(() => {
     if (!speciesQuery.data || currentSearch === location.search) {
@@ -124,6 +147,15 @@ export const IndividualListScreen = () => {
     );
   };
 
+  const handleExport = () => {
+    try {
+      downloadIndividualCsv(selectedIndividuals);
+      setExportError('');
+    } catch {
+      setExportError('CSVファイルの出力に失敗しました');
+    }
+  };
+
   if (individualsQuery.isLoading || speciesQuery.isLoading) {
     return <StatusBanner>読み込み中...</StatusBanner>;
   }
@@ -142,6 +174,14 @@ export const IndividualListScreen = () => {
         title="個体一覧"
         actions={
           <div className={adminStyles.inlineActions}>
+            <button
+              className={adminStyles.buttonGhost}
+              type="button"
+              disabled={selectedIndividuals.length === 0}
+              onClick={handleExport}
+            >
+              CSV出力（{selectedIndividuals.length}件）
+            </button>
             <button className={adminStyles.button} onClick={() => navigate(`/admin/individuals/new${currentSearch}`)}>
               新規登録
             </button>
@@ -253,9 +293,49 @@ export const IndividualListScreen = () => {
       ) : null}
 
       {successMessage ? <StatusBanner>{successMessage}</StatusBanner> : null}
+      {exportError ? <StatusBanner tone="error">{exportError}</StatusBanner> : null}
 
       <DataTable<Individual>
         columns={[
+          {
+            key: 'selection',
+            header: (
+              <input
+                ref={selectAllCheckboxRef}
+                type="checkbox"
+                aria-label="表示中の個体をすべて選択"
+                checked={allSelected}
+                disabled={individuals.length === 0}
+                onChange={(event) => {
+                  setSelectedKeys(event.target.checked ? new Set(individuals.map(getIndividualKey)) : new Set());
+                }}
+              />
+            ),
+            className: adminStyles.tableSelectionCell,
+            renderCell: (individual) => {
+              const key = getIndividualKey(individual);
+              return (
+                <input
+                  type="checkbox"
+                  aria-label={`${individual.id}を選択`}
+                  checked={selectedKeys.has(key)}
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  onChange={(event) => {
+                    setSelectedKeys((current) => {
+                      const next = new Set(current);
+                      if (event.target.checked) {
+                        next.add(key);
+                      } else {
+                        next.delete(key);
+                      }
+                      return next;
+                    });
+                  }}
+                />
+              );
+            },
+          },
           {
             key: 'image',
             header: '',
@@ -272,7 +352,7 @@ export const IndividualListScreen = () => {
             renderCell: (individual) => formatGenderCategory(individual.gender_category),
           },
         ]}
-        rows={individualsQuery.data ?? []}
+        rows={individuals}
         emptyMessage="個体情報はまだありません"
         getRowKey={(individual) => `${individual.species_id}-${individual.id}`}
         onRowClick={(individual) =>

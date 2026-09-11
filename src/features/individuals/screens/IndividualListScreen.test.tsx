@@ -1,8 +1,9 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { IndividualListScreen } from './IndividualListScreen';
 
 const mockNavigate = jest.fn();
 const mockSetSearchParams = jest.fn();
+const mockDownloadIndividualCsv = jest.fn();
 const mockSearchParams = new URLSearchParams('speciesId=leo&fiscalYear=2026');
 
 jest.mock('react-router-dom', () => ({
@@ -47,6 +48,10 @@ jest.mock('../components/IndividualThumbnailCell', () => ({
   IndividualThumbnailCell: () => <span>thumb</span>,
 }));
 
+jest.mock('../utils/individualCsv', () => ({
+  downloadIndividualCsv: (...args: unknown[]) => mockDownloadIndividualCsv(...args),
+}));
+
 describe('IndividualListScreen', () => {
   it('does not render a species column in the list', () => {
     mockNavigate.mockReset();
@@ -61,5 +66,39 @@ describe('IndividualListScreen', () => {
     expect(within(table).queryByText('Leopard Gecko')).not.toBeInTheDocument();
     expect(within(table).getByText('個体ID')).toBeInTheDocument();
     expect(within(table).getByText('Mack Snow')).toBeInTheDocument();
+  });
+
+  it('selects an individual without opening its detail and exports it as CSV', () => {
+    mockNavigate.mockReset();
+    mockDownloadIndividualCsv.mockReset();
+
+    render(<IndividualListScreen />);
+
+    const exportButton = screen.getByRole('button', { name: 'CSV出力（0件）' });
+    expect(exportButton).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'A1を選択' }));
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'CSV出力（1件）' })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'CSV出力（1件）' }));
+
+    expect(mockDownloadIndividualCsv).toHaveBeenCalledWith([
+      expect.objectContaining({ species_id: 'leo', id: 'A1' }),
+    ]);
+  });
+
+  it('selects and clears every displayed individual from the header checkbox', () => {
+    render(<IndividualListScreen />);
+
+    const selectAll = screen.getByRole('checkbox', { name: '表示中の個体をすべて選択' });
+    fireEvent.click(selectAll);
+    expect(screen.getByRole('checkbox', { name: 'A1を選択' })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'CSV出力（1件）' })).toBeEnabled();
+
+    fireEvent.click(selectAll);
+    expect(screen.getByRole('checkbox', { name: 'A1を選択' })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'CSV出力（0件）' })).toBeDisabled();
   });
 });

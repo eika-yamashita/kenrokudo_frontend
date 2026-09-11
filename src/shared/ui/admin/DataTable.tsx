@@ -3,7 +3,7 @@ import styles from './AdminUi.module.css';
 
 export type DataTableColumn<T> = {
   key: string;
-  header: string;
+  header: ReactNode;
   renderCell: (row: T) => ReactNode;
   className?: string;
 };
