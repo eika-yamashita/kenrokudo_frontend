@@ -16,6 +16,7 @@ type Props<T> = {
   onRowClick?: (row: T) => void;
   density?: 'default' | 'compact';
   noWrap?: boolean;
+  fitContent?: boolean;
 };
 
 export function DataTable<T>({
@@ -26,6 +27,7 @@ export function DataTable<T>({
   onRowClick,
   density = 'default',
   noWrap = false,
+  fitContent = false,
 }: Props<T>) {
   const handleKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, row: T) => {
     if (!onRowClick) return;
@@ -37,9 +39,9 @@ export function DataTable<T>({
   };
 
   return (
-    <div className={styles.tableWrap}>
+    <div className={`${styles.tableWrap} ${fitContent ? styles.tableWrapFitContent : ''}`}>
       <table
-        className={`${styles.table} ${density === 'compact' ? styles.tableCompact : ''} ${noWrap ? styles.tableNoWrap : ''}`}
+        className={`${styles.table} ${density === 'compact' ? styles.tableCompact : ''} ${noWrap ? styles.tableNoWrap : ''} ${fitContent ? styles.tableFitContent : ''}`}
       >
         <thead>
           <tr>

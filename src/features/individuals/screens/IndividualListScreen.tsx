@@ -351,6 +351,14 @@ export const IndividualListScreen = () => {
             header: '性別',
             renderCell: (individual) => formatGenderCategory(individual.gender_category),
           },
+          {
+            key: 'amount',
+            header: '金額',
+            renderCell: (individual) =>
+              individual.sales_price_tax_in === undefined || individual.sales_price_tax_in === null
+                ? '-'
+                : individual.sales_price_tax_in.toLocaleString('ja-JP'),
+          },
         ]}
         rows={individuals}
         emptyMessage="個体情報はまだありません"
@@ -359,6 +367,8 @@ export const IndividualListScreen = () => {
           navigate(`/admin/individuals/detail/${individual.species_id}/${individual.id}${currentSearch}`)
         }
         density="compact"
+        noWrap
+        fitContent
       />
     </AdminPageLayout>
   );

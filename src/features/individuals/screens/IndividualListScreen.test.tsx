@@ -37,6 +37,7 @@ jest.mock('../hooks/useIndividualQueries', () => ({
           },
         ],
         gender_category: '1',
+        sales_price_tax_in: 1234567,
         create_user: 'system',
         create_at: '2026-04-08T10:15',
       },
@@ -66,6 +67,8 @@ describe('IndividualListScreen', () => {
     expect(within(table).queryByText('Leopard Gecko')).not.toBeInTheDocument();
     expect(within(table).getByText('個体ID')).toBeInTheDocument();
     expect(within(table).getByText('Mack Snow')).toBeInTheDocument();
+    expect(within(table).getByText('金額')).toBeInTheDocument();
+    expect(within(table).getByText('1,234,567')).toBeInTheDocument();
   });
 
   it('selects an individual without opening its detail and exports it as CSV', () => {

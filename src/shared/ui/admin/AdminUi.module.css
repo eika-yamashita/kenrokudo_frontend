@@ -270,6 +270,11 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.tableWrapFitContent {
+  width: fit-content;
+  max-width: 100%;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -300,10 +305,11 @@
 }
 
 .tableImageCell {
-  width: 48px;
-  min-width: 48px;
+  width: 72px;
+  min-width: 72px;
   height: 48px;
   padding: 0 !important;
+  text-align: center !important;
 }
 
 .tableSelectionCell {
@@ -324,6 +330,11 @@
 .tableNoWrap th,
 .tableNoWrap td {
   white-space: nowrap;
+}
+
+.table.tableFitContent {
+  width: max-content;
+  min-width: 0;
 }
 
 .table th {
@@ -786,8 +797,10 @@
 
 .thumbCompact {
   display: block;
-  width: 48px;
+  width: 64px;
   height: 48px;
+  margin-inline: auto;
+  box-sizing: border-box;
   border: none;
   border-radius: 0;
 }
