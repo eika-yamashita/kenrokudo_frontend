@@ -13,6 +13,7 @@ import { useBloodlinesQuery } from '../../bloodlines/hooks/useBloodlineQueries';
 import { useMorphsQuery } from '../../morphs/hooks/useMorphQueries';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { getSpeciesLabel } from '../../species/utils/getSpeciesLabel';
+import { createReturnNavigationState, getReturnTo } from '../../../shared/utils/returnNavigation';
 import { ImageUploadPicker } from '../components/ImageUploadPicker';
 import { IndividualFormFields } from '../components/IndividualFormFields';
 import { IndividualImageManager } from '../components/IndividualImageManager';
@@ -103,6 +104,7 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
     deleteIndividualMutation.isPending ||
     setPrimaryMutation.isPending;
   const listSearch = location.search;
+  const returnState = createReturnNavigationState(getReturnTo(location.state));
   const confirmSave = () => {
     if (typeof window === 'undefined' || typeof window.confirm !== 'function') return true;
 
@@ -169,7 +171,9 @@ export const IndividualEditScreen = ({ speciesId, id }: Props) => {
             <button
               className={adminStyles.buttonGhost}
               type="button"
-              onClick={() => navigate(`/admin/individuals/detail/${speciesId}/${id}${listSearch}`)}
+              onClick={() =>
+                navigate(`/admin/individuals/detail/${speciesId}/${id}${listSearch}`, { state: returnState })
+              }
             >
               戻る
             </button>

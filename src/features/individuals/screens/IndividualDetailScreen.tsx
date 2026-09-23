@@ -8,6 +8,7 @@ import {
 } from '../../../shared/ui/admin';
 import { formatDateTimeYmdHm, formatDateYmd } from '../../../utils/dateFormat';
 import { formatGenderCategory } from '../../../utils/genderCategory';
+import { createReturnNavigationState, getReturnTo } from '../../../shared/utils/returnNavigation';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { getSpeciesLabel } from '../../species/utils/getSpeciesLabel';
 import { useIndividualImagesQuery, useIndividualQuery } from '../hooks/useIndividualQueries';
@@ -68,6 +69,8 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
   const selectedImage = images.find((image) => image.image_id === selectedImageId) ?? defaultImage;
   const selectedImageIndex = selectedImage ? images.findIndex((image) => image.image_id === selectedImage.image_id) : -1;
   const listSearch = location.search;
+  const returnTo = getReturnTo(location.state);
+  const returnState = createReturnNavigationState(returnTo);
   const showPurchaseDetails = individual.breeding_category === '1';
   const showBreedingDetails = individual.breeding_category === '0';
   const showSalesTo = individual.sales_category === '2';
@@ -152,7 +155,9 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
         <button
           type="button"
           className={adminStyles.textLinkButton}
-          onClick={() => navigate(`/admin/individuals/detail/${speciesId}/${parentId}${listSearch}`)}
+          onClick={() =>
+            navigate(`/admin/individuals/detail/${speciesId}/${parentId}${listSearch}`, { state: returnState })
+          }
         >
           {parentId}
         </button>
@@ -168,13 +173,19 @@ export const IndividualDetailScreen = ({ speciesId, id }: Props) => {
         title={`${speciesLabel} / ${individual.id}`}
         actions={
           <div className={adminStyles.inlineActions}>
-            <button className={adminStyles.buttonGhost} type="button" onClick={() => navigate(`/admin/individuals${listSearch}`)}>
+            <button
+              className={adminStyles.buttonGhost}
+              type="button"
+              onClick={() => navigate(returnTo ?? `/admin/individuals${listSearch}`)}
+            >
               戻る
             </button>
             <button
               className={adminStyles.button}
               type="button"
-              onClick={() => navigate(`/admin/individuals/edit/${speciesId}/${id}${listSearch}`)}
+              onClick={() =>
+                navigate(`/admin/individuals/edit/${speciesId}/${id}${listSearch}`, { state: returnState })
+              }
             >
               編集
             </button>

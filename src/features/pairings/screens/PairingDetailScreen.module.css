@@ -1,0 +1,78 @@
+.parentPair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(10px, 3vw, 28px);
+  width: min(760px, 100%);
+  margin: 0 auto 28px;
+}
+
+.parentCard {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  text-align: center;
+}
+
+.parentCard h2 {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.parentImage {
+  display: grid;
+  place-items: center;
+  width: min(100%, 280px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid #2f3437;
+  border-radius: 4px;
+  background: #f8f8f7;
+}
+
+.parentImage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.parentImageMessage {
+  padding: 12px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.parentMorph {
+  min-width: 0;
+  margin: 0;
+  color: var(--text-main);
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.pairingMark {
+  color: #2f3437;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 400;
+}
+
+@media (max-width: 640px) {
+  .parentPair {
+    gap: 8px;
+  }
+
+  .parentCard {
+    gap: 6px;
+  }
+
+  .parentMorph {
+    font-size: 0.8rem;
+  }
+}

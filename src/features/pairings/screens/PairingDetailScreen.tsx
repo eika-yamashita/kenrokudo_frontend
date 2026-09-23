@@ -1,9 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminPageLayout, PageHeader, StatusBanner, adminStyles } from '../../../shared/ui/admin';
 import { formatDateYmd } from '../../../utils/dateFormat';
+import { PairingParentCard } from '../components/PairingParentCard';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { getSpeciesLabel } from '../../species/utils/getSpeciesLabel';
 import { usePairingQuery } from '../hooks/usePairingQueries';
+import styles from './PairingDetailScreen.module.css';
 
 type Props = {
   speciesId: string;
@@ -35,6 +37,8 @@ export const PairingDetailScreen = ({ speciesId, fiscalYear, pairingId }: Props)
 
   const pairing = pairingQuery.data;
   const listSearch = location.search;
+  const returnTo = `${location.pathname}${location.search}`;
+  const returnState = { returnTo };
 
   return (
     <AdminPageLayout>
@@ -56,6 +60,24 @@ export const PairingDetailScreen = ({ speciesId, fiscalYear, pairingId }: Props)
           </div>
         }
       />
+
+      <div className={styles.parentPair} aria-label="ペアリング個体">
+        <PairingParentCard
+          label="オス親"
+          speciesId={pairing.species_id}
+          individualId={pairing.male_parent_id}
+          returnState={returnState}
+        />
+        <span className={styles.pairingMark} aria-hidden="true">
+          ×
+        </span>
+        <PairingParentCard
+          label="メス親"
+          speciesId={pairing.species_id}
+          individualId={pairing.female_parent_id}
+          returnState={returnState}
+        />
+      </div>
 
       <div className={adminStyles.sectionPlain}>
         <dl className={adminStyles.detailGrid}>
