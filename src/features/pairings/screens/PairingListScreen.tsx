@@ -8,10 +8,11 @@ import {
   parsePositiveIntegerParam,
 } from '../../../shared/utils/searchParams';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
+import { getJapanYear } from '../../../utils/japanDate';
 import { usePairingSearchQuery } from '../hooks/usePairingQueries';
 
 const DEFAULT_SPECIES_ID = '0001';
-const DEFAULT_FISCAL_YEAR = new Date().getFullYear();
+const DEFAULT_FISCAL_YEAR = getJapanYear();
 
 const createYearOptions = (startYear: number, endYear: number) => {
   const from = Math.min(startYear, endYear);
@@ -191,7 +192,12 @@ export const PairingListScreen = () => {
 
       <DataTable<Pairing>
         columns={[
-          { key: 'pairing_id', header: 'ペアリングID', renderCell: (pairing) => pairing.pairing_id ?? '-' },
+          {
+            key: 'pairing_id',
+            header: 'ID',
+            className: adminStyles.tablePairingIdCell,
+            renderCell: (pairing) => pairing.pairing_id ?? '-',
+          },
           { key: 'male_parent_id', header: 'オス親ID', renderCell: (pairing) => pairing.male_parent_id },
           { key: 'female_parent_id', header: 'メス親ID', renderCell: (pairing) => pairing.female_parent_id },
           { key: 'pairing_date', header: 'ペアリング日', renderCell: (pairing) => pairing.pairing_date },
@@ -203,7 +209,7 @@ export const PairingListScreen = () => {
         noWrap
         onRowClick={(pairing) => {
           if (!pairing.fiscal_year || !pairing.pairing_id) return;
-          navigate(`/admin/pairings/edit/${pairing.species_id}/${pairing.fiscal_year}/${pairing.pairing_id}${currentSearch}`);
+          navigate(`/admin/pairings/detail/${pairing.species_id}/${pairing.fiscal_year}/${pairing.pairing_id}${currentSearch}`);
         }}
       />
     </AdminPageLayout>

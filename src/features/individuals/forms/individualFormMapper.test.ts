@@ -1,5 +1,5 @@
 import type { Individual } from '../../../api/models/Individual';
-import { individualToFormValues } from './individualFormMapper';
+import { createEmptyIndividualFormValues, formValuesToIndividual, individualToFormValues } from './individualFormMapper';
 
 describe('individualFormMapper', () => {
   it('normalizes date fields for edit form inputs', () => {
@@ -52,5 +52,20 @@ describe('individualFormMapper', () => {
     expect(values.het_entries[0]?.morph_id).toBe('002');
     expect(values.possible_het_entries[0]?.morph_id).toBe('003');
     expect(values.possible_het_entries[0]?.possible_het_percentage).toBe('66');
+  });
+
+  it('does not add audit timestamps to an API payload', () => {
+    const payload = formValuesToIndividual({
+      ...createEmptyIndividualFormValues(),
+      species_id: 'leo',
+      fiscal_year: '2026',
+      id: 'A1',
+      visual_morph_id: '001',
+    });
+
+    expect(payload).not.toHaveProperty('create_user');
+    expect(payload).not.toHaveProperty('create_at');
+    expect(payload).not.toHaveProperty('update_user');
+    expect(payload).not.toHaveProperty('update_at');
   });
 });

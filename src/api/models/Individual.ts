@@ -25,8 +25,8 @@ export interface Individual {
   sales_date?: string;
   death_date?: string;
   note?: string;
-  create_user: string;
-  create_at: string;
+  create_user?: string;
+  create_at?: string;
   update_user?: string;
   update_at?: string;
 }

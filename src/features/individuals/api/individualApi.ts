@@ -26,34 +26,40 @@ const normalizeMorphEntriesForApi = (entries?: IndividualMorph[]) =>
     sort_order: toNullableNumber(entry.sort_order as number | undefined),
   }));
 
-const normalizeIndividualForApi = (individual: Individual) => ({
-  ...individual,
-  fiscal_year: toNullableNumber(individual.fiscal_year as number | undefined),
-  id: toNullableString(individual.id),
-  pairing_fiscal_year: toNullableNumber(individual.pairing_fiscal_year as number | undefined),
-  pairing_id: toNullableString(individual.pairing_id),
-  male_parent_id: toNullableString(individual.male_parent_id),
-  female_parent_id: toNullableString(individual.female_parent_id),
-  morph_entries: normalizeMorphEntriesForApi(individual.morph_entries),
-  gender_category: toNullableString(individual.gender_category),
-  breeding_category: toNullableString(individual.breeding_category),
-  breeder: toNullableString(individual.breeder),
-  clutch_date: toNullableString(individual.clutch_date),
-  hatch_date: toNullableString(individual.hatch_date),
-  purchase_from: toNullableString(individual.purchase_from),
-  purchase_price: toNullableNumber(individual.purchase_price as number | undefined),
-  purchase_date: toNullableString(individual.purchase_date),
-  sales_category: toNullableString(individual.sales_category),
-  sales_to: toNullableString(individual.sales_to),
-  sales_price_tax_ex: toNullableNumber(individual.sales_price_tax_ex as number | undefined),
-  sales_price_tax: toNullableNumber(individual.sales_price_tax as number | undefined),
-  sales_price_tax_in: toNullableNumber(individual.sales_price_tax_in as number | undefined),
-  sales_date: toNullableString(individual.sales_date),
-  death_date: toNullableString(individual.death_date),
-  note: toNullableString(individual.note),
-  update_user: toNullableString(individual.update_user),
-  update_at: toNullableString(individual.update_at),
-});
+const normalizeIndividualForApi = (individual: Individual) => {
+  const editableFields = { ...individual };
+  delete editableFields.create_user;
+  delete editableFields.create_at;
+  delete editableFields.update_user;
+  delete editableFields.update_at;
+
+  return {
+    ...editableFields,
+    fiscal_year: toNullableNumber(individual.fiscal_year as number | undefined),
+    id: toNullableString(individual.id),
+    pairing_fiscal_year: toNullableNumber(individual.pairing_fiscal_year as number | undefined),
+    pairing_id: toNullableString(individual.pairing_id),
+    male_parent_id: toNullableString(individual.male_parent_id),
+    female_parent_id: toNullableString(individual.female_parent_id),
+    morph_entries: normalizeMorphEntriesForApi(individual.morph_entries),
+    gender_category: toNullableString(individual.gender_category),
+    breeding_category: toNullableString(individual.breeding_category),
+    breeder: toNullableString(individual.breeder),
+    clutch_date: toNullableString(individual.clutch_date),
+    hatch_date: toNullableString(individual.hatch_date),
+    purchase_from: toNullableString(individual.purchase_from),
+    purchase_price: toNullableNumber(individual.purchase_price as number | undefined),
+    purchase_date: toNullableString(individual.purchase_date),
+    sales_category: toNullableString(individual.sales_category),
+    sales_to: toNullableString(individual.sales_to),
+    sales_price_tax_ex: toNullableNumber(individual.sales_price_tax_ex as number | undefined),
+    sales_price_tax: toNullableNumber(individual.sales_price_tax as number | undefined),
+    sales_price_tax_in: toNullableNumber(individual.sales_price_tax_in as number | undefined),
+    sales_date: toNullableString(individual.sales_date),
+    death_date: toNullableString(individual.death_date),
+    note: toNullableString(individual.note),
+  };
+};
 
 const toSearchQueryString = ({ speciesId, fiscalYear, morph }: IndividualSearchParams) => {
   const params = new URLSearchParams();

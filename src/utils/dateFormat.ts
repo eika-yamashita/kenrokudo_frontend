@@ -1,5 +1,25 @@
 const pad2 = (value: number) => String(value).padStart(2, '0');
 
+const japanDateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Tokyo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+const formatJapanDateTime = (date: Date): string => {
+  const values = Object.fromEntries(
+    japanDateTimeFormatter
+      .formatToParts(date)
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value])
+  );
+  return `${values.year}-${values.month}-${values.day} ${values.hour}:${values.minute}`;
+};
+
 const parseDate = (value: string): Date | null => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -24,6 +44,11 @@ export const formatDateTimeYmdHm = (raw: string | null | undefined): string => {
   if (!raw) return '-';
 
   const trimmed = raw.trim();
+  if (/(?:Z|[+-]\d{2}:?\d{2})$/i.test(trimmed)) {
+    const parsed = parseDate(trimmed);
+    return parsed ? formatJapanDateTime(parsed) : raw;
+  }
+
   const dateTimeMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})/);
   if (dateTimeMatch) {
     return `${dateTimeMatch[1]} ${dateTimeMatch[2]}:${dateTimeMatch[3]}`;

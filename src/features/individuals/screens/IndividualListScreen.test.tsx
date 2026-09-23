@@ -92,15 +92,15 @@ describe('IndividualListScreen', () => {
 
     renderList();
 
-    const exportButton = screen.getByRole('button', { name: 'CSV出力（0件）' });
+    const exportButton = screen.getByRole('button', { name: 'CSV出力' });
     expect(exportButton).toBeDisabled();
 
     fireEvent.click(screen.getByRole('checkbox', { name: 'A1を選択' }));
 
     expect(mockNavigate).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'CSV出力（1件）' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'CSV出力 1件' })).toBeEnabled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'CSV出力（1件）' }));
+    fireEvent.click(screen.getByRole('button', { name: 'CSV出力 1件' }));
 
     expect(mockDownloadIndividualCsv).toHaveBeenCalledWith([
       expect.objectContaining({ species_id: 'leo', id: 'A1' }),
@@ -127,11 +127,11 @@ describe('IndividualListScreen', () => {
     const selectAll = screen.getByRole('checkbox', { name: '表示中の個体をすべて選択' });
     fireEvent.click(selectAll);
     expect(screen.getByRole('checkbox', { name: 'A1を選択' })).toBeChecked();
-    expect(screen.getByRole('button', { name: 'CSV出力（1件）' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'CSV出力 1件' })).toBeEnabled();
 
     fireEvent.click(selectAll);
     expect(screen.getByRole('checkbox', { name: 'A1を選択' })).not.toBeChecked();
-    expect(screen.getByRole('button', { name: 'CSV出力（0件）' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'CSV出力' })).toBeDisabled();
   });
 
   it('keeps selected individuals when the list is temporarily unmounted', () => {
@@ -152,7 +152,7 @@ describe('IndividualListScreen', () => {
     );
 
     expect(screen.getByRole('checkbox', { name: 'A1を選択' })).toBeChecked();
-    expect(screen.getByRole('button', { name: 'CSV出力（1件）' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'CSV出力 1件' })).toBeEnabled();
   });
 
   it('clears selected individuals when the search conditions change', () => {
@@ -168,6 +168,6 @@ describe('IndividualListScreen', () => {
     );
 
     expect(screen.getByRole('checkbox', { name: 'A1を選択' })).not.toBeChecked();
-    expect(screen.getByRole('button', { name: 'CSV出力（0件）' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'CSV出力' })).toBeDisabled();
   });
 });

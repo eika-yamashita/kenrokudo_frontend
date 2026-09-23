@@ -9,6 +9,7 @@ import {
   parsePositiveIntegerParam,
 } from '../../../shared/utils/searchParams';
 import { formatGenderCategory } from '../../../utils/genderCategory';
+import { getJapanYear } from '../../../utils/japanDate';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { IndividualThumbnailCell } from '../components/IndividualThumbnailCell';
 import { useIndividualSelection } from '../context/IndividualSelectionContext';
@@ -17,7 +18,7 @@ import { getIndividualMorphDisplay } from '../utils/getIndividualMorphDisplay';
 import { downloadIndividualCsv } from '../utils/individualCsv';
 
 const DEFAULT_SPECIES_ID = '0001';
-const DEFAULT_FISCAL_YEAR = new Date().getFullYear();
+const DEFAULT_FISCAL_YEAR = getJapanYear();
 
 const getIndividualKey = (individual: Pick<Individual, 'species_id' | 'id'>) =>
   `${individual.species_id}\u0000${individual.id}`;
@@ -194,7 +195,7 @@ export const IndividualListScreen = () => {
               disabled={selectedIndividuals.length === 0}
               onClick={handleExport}
             >
-              CSV出力（{selectedIndividuals.length}件）
+              {selectedIndividuals.length > 0 ? `CSV出力 ${selectedIndividuals.length}件` : 'CSV出力'}
             </button>
             <button className={adminStyles.button} onClick={() => navigate(`/admin/individuals/new${currentSearch}`)}>
               新規登録

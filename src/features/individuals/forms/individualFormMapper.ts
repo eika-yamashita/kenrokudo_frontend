@@ -1,11 +1,10 @@
 import type { Individual } from '../../../api/models/Individual';
 import type { IndividualMorph } from '../../../api/models/IndividualMorph';
 import { toDateInputValue } from '../../../utils/dateFormat';
+import { getJapanYear, toJapanDateInputValue } from '../../../utils/japanDate';
 import type { IndividualFormValues } from './individualFormSchema';
 
-const today = () => new Date().toISOString().slice(0, 10);
-const now = () => new Date().toISOString().slice(0, 16);
-const currentYear = () => String(new Date().getFullYear());
+const currentYear = () => String(getJapanYear());
 
 const toStringValue = (value?: string | number | null) =>
   value === undefined || value === null ? '' : String(value);
@@ -39,7 +38,7 @@ export const createEmptyIndividualFormValues = (): IndividualFormValues => ({
   breeding_category: '0',
   breeder: '自家繁殖',
   clutch_date: '',
-  hatch_date: today(),
+  hatch_date: toJapanDateInputValue(),
   purchase_from: '',
   purchase_price: '',
   purchase_date: '',
@@ -155,9 +154,5 @@ export const formValuesToIndividual = (
     sales_date: values.sales_date || undefined,
     death_date: values.death_date || undefined,
     note: values.note || undefined,
-    create_user: base?.create_user ?? 'system',
-    create_at: base?.create_at ?? now(),
-    update_user: 'system',
-    update_at: now(),
   };
 };

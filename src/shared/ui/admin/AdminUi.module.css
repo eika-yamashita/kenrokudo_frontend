@@ -328,6 +328,12 @@
   cursor: pointer;
 }
 
+.tablePairingIdCell {
+  width: 88px;
+  min-width: 88px;
+  max-width: 88px;
+}
+
 .tableNoWrap th,
 .tableNoWrap td {
   white-space: nowrap;

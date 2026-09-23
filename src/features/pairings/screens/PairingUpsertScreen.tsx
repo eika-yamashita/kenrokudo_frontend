@@ -85,7 +85,7 @@ export const PairingUpsertScreen = (props: Props) => {
       pairing: payload,
     });
 
-    navigate(`/admin/pairings/edit/${updated.species_id}/${updated.fiscal_year}/${updated.pairing_id}${listSearch}`, {
+    navigate(`/admin/pairings/detail/${updated.species_id}/${updated.fiscal_year}/${updated.pairing_id}${listSearch}`, {
       replace: true,
     });
   });
@@ -115,8 +115,17 @@ export const PairingUpsertScreen = (props: Props) => {
       <PageHeader
         title={props.mode === 'create' ? 'ペアリング新規登録' : 'ペアリング編集'}
         actions={
-          <button className={adminStyles.buttonGhost} onClick={() => navigate(`/admin/pairings${listSearch}`)}>
-            {props.mode === 'edit' ? '戻る' : '戻る'}
+          <button
+            className={adminStyles.buttonGhost}
+            onClick={() =>
+              navigate(
+                props.mode === 'edit'
+                  ? `/admin/pairings/detail/${props.speciesId}/${props.fiscalYear}/${props.pairingId}${listSearch}`
+                  : `/admin/pairings${listSearch}`
+              )
+            }
+          >
+            戻る
           </button>
         }
       />

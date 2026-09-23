@@ -1,7 +1,6 @@
 import type { Pairing } from '../../../api/models/Pairing';
+import { toJapanDateInputValue } from '../../../utils/japanDate';
 import type { PairingFormValues } from './pairingFormSchema';
-
-const today = () => new Date().toISOString().slice(0, 10);
 
 export const createEmptyPairingFormValues = (): PairingFormValues => ({
   species_id: '',
@@ -9,7 +8,7 @@ export const createEmptyPairingFormValues = (): PairingFormValues => ({
   fiscal_year: '',
   male_parent_id: '',
   female_parent_id: '',
-  pairing_date: today(),
+  pairing_date: toJapanDateInputValue(),
   note: '',
 });
 

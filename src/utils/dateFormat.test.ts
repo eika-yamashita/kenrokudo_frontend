@@ -16,6 +16,11 @@ describe('dateFormat', () => {
     expect(toDateTimeLocalInputValue('2026-04-08 10:15:00')).toBe('2026-04-08T10:15');
   });
 
+  it('converts offset date-time values to Japanese time', () => {
+    expect(formatDateTimeYmdHm('2026-04-08T01:15:00Z')).toBe('2026-04-08 10:15');
+    expect(formatDateTimeYmdHm('2026-04-08T10:15:00+09:00')).toBe('2026-04-08 10:15');
+  });
+
   it('falls back safely on empty values', () => {
     expect(formatDateYmd(undefined)).toBe('-');
     expect(formatDateTimeYmdHm(null)).toBe('-');

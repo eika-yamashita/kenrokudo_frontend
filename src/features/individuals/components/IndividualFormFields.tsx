@@ -7,6 +7,7 @@ import type { Species } from '../../../api/models/Species';
 import { adminStyles } from '../../../shared/ui/admin';
 import { genderCategoryOptions } from '../../../utils/genderCategory';
 import { normalizeIdInput } from '../../../utils/idNormalizer';
+import { getJapanYear, toJapanDateInputValue } from '../../../utils/japanDate';
 import type { IndividualFormValues } from '../forms/individualFormSchema';
 
 const breedingCategoryOptions = [
@@ -20,7 +21,7 @@ const salesCategoryOptions = [
   { value: '2', label: '販売済み' },
 ];
 
-const currentYear = new Date().getFullYear();
+const currentYear = getJapanYear();
 const fiscalYearOptions = Array.from({ length: currentYear - 2021 + 1 }, (_, index) =>
   String(currentYear - index)
 );
@@ -279,7 +280,7 @@ export const IndividualFormFields = ({
             setValue('breeder', '自家繁殖', { shouldDirty: true });
             setValue('pairing_fiscal_year', '', { shouldDirty: true, shouldValidate: true });
             clearPairingSelection();
-            setValue('hatch_date', new Date().toISOString().slice(0, 10), {
+            setValue('hatch_date', toJapanDateInputValue(), {
               shouldDirty: true,
               shouldValidate: true,
             });

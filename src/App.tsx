@@ -17,6 +17,7 @@ import { IndividualEditorPage } from './pages/IndividualEditorPage';
 import { IndividualCreatePage } from './pages/IndividualCreatePage';
 import { PairingListPage } from './pages/PairingListPage';
 import { PairingCreatePage } from './pages/PairingCreatePage';
+import { PairingDetailPage } from './pages/PairingDetailPage';
 import { PairingEditorPage } from './pages/PairingEditorPage';
 import { EventListPage } from './pages/EventListPage';
 import { EventUpsertPage } from './pages/EventUpsertPage';
@@ -73,6 +74,7 @@ function AppContent() {
           </Route>
           <Route path="/admin/pairings" element={<PairingListPage />} />
           <Route path="/admin/pairings/new" element={<PairingCreatePage />} />
+          <Route path="/admin/pairings/detail/:species_id/:fiscal_year/:pairing_id" element={<PairingDetailPage />} />
           <Route path="/admin/pairings/edit/:species_id/:fiscal_year/:pairing_id" element={<PairingEditorPage />} />
           <Route path="/admin/events" element={<EventListPage />} />
           <Route path="/admin/events/new" element={<EventUpsertPage mode="create" />} />
