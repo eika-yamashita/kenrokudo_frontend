@@ -240,6 +240,7 @@
 
 .eventList a {
   display: grid;
+  grid-column: 1 / -1;
   grid-template-columns: minmax(150px, 180px) minmax(0, 1fr);
   gap: clamp(18px, 3vw, 42px);
   color: inherit;

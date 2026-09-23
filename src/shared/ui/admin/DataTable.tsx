@@ -6,6 +6,7 @@ export type DataTableColumn<T> = {
   header: ReactNode;
   renderCell: (row: T) => ReactNode;
   className?: string;
+  suppressRowClick?: boolean;
 };
 
 type Props<T> = {
@@ -68,7 +69,12 @@ export function DataTable<T>({
                 tabIndex={onRowClick ? 0 : undefined}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={column.className}>
+                  <td
+                    key={column.key}
+                    className={column.className}
+                    onClick={column.suppressRowClick ? (event) => event.stopPropagation() : undefined}
+                    onKeyDown={column.suppressRowClick ? (event) => event.stopPropagation() : undefined}
+                  >
                     {column.renderCell(row)}
                   </td>
                 ))}

@@ -1,15 +1,18 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { IndividualSelectionProvider } from '../context/IndividualSelectionContext';
 import { IndividualListScreen } from './IndividualListScreen';
 
 const mockNavigate = jest.fn();
 const mockSetSearchParams = jest.fn();
 const mockDownloadIndividualCsv = jest.fn();
 const mockSearchParams = new URLSearchParams('speciesId=leo&fiscalYear=2026');
+let mockLocation = { pathname: '/admin/individuals', search: '?speciesId=leo&fiscalYear=2026', state: null };
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
-  useLocation: () => ({ search: '?speciesId=leo&fiscalYear=2026' }),
+  useLocation: () => mockLocation,
   useSearchParams: () => [mockSearchParams, mockSetSearchParams],
+  Outlet: () => null,
 }), { virtual: true });
 
 jest.mock('../../species/hooks/useSpeciesQuery', () => ({
@@ -54,13 +57,25 @@ jest.mock('../utils/individualCsv', () => ({
 }));
 
 describe('IndividualListScreen', () => {
+  const renderList = () =>
+    render(
+      <IndividualSelectionProvider>
+        <IndividualListScreen />
+      </IndividualSelectionProvider>
+    );
+
+  beforeEach(() => {
+    mockSearchParams.set('speciesId', 'leo');
+    mockSearchParams.set('fiscalYear', '2026');
+    mockSearchParams.delete('morph');
+    mockLocation = { pathname: '/admin/individuals', search: '?speciesId=leo&fiscalYear=2026', state: null };
+  });
+
   it('does not render a species column in the list', () => {
     mockNavigate.mockReset();
     mockSetSearchParams.mockReset();
 
-    render(
-      <IndividualListScreen />
-    );
+    renderList();
 
     const table = screen.getByRole('table');
     expect(within(table).queryByText('種名')).not.toBeInTheDocument();
@@ -75,7 +90,7 @@ describe('IndividualListScreen', () => {
     mockNavigate.mockReset();
     mockDownloadIndividualCsv.mockReset();
 
-    render(<IndividualListScreen />);
+    renderList();
 
     const exportButton = screen.getByRole('button', { name: 'CSV出力（0件）' });
     expect(exportButton).toBeDisabled();
@@ -92,8 +107,22 @@ describe('IndividualListScreen', () => {
     ]);
   });
 
+  it('does not open the detail when the selection cell whitespace is clicked', () => {
+    mockNavigate.mockReset();
+    renderList();
+
+    const checkbox = screen.getByRole('checkbox', { name: 'A1を選択' });
+    const selectionCell = checkbox.closest('td');
+    expect(selectionCell).not.toBeNull();
+
+    fireEvent.click(selectionCell!);
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(checkbox).not.toBeChecked();
+  });
+
   it('selects and clears every displayed individual from the header checkbox', () => {
-    render(<IndividualListScreen />);
+    renderList();
 
     const selectAll = screen.getByRole('checkbox', { name: '表示中の個体をすべて選択' });
     fireEvent.click(selectAll);
@@ -101,6 +130,43 @@ describe('IndividualListScreen', () => {
     expect(screen.getByRole('button', { name: 'CSV出力（1件）' })).toBeEnabled();
 
     fireEvent.click(selectAll);
+    expect(screen.getByRole('checkbox', { name: 'A1を選択' })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'CSV出力（0件）' })).toBeDisabled();
+  });
+
+  it('keeps selected individuals when the list is temporarily unmounted', () => {
+    const view = renderList();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'A1を選択' }));
+    expect(screen.getByRole('checkbox', { name: 'A1を選択' })).toBeChecked();
+
+    view.rerender(
+      <IndividualSelectionProvider>
+        <div>個体詳細</div>
+      </IndividualSelectionProvider>
+    );
+    view.rerender(
+      <IndividualSelectionProvider>
+        <IndividualListScreen />
+      </IndividualSelectionProvider>
+    );
+
+    expect(screen.getByRole('checkbox', { name: 'A1を選択' })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'CSV出力（1件）' })).toBeEnabled();
+  });
+
+  it('clears selected individuals when the search conditions change', () => {
+    const view = renderList();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'A1を選択' }));
+    mockSearchParams.set('fiscalYear', '2025');
+    mockLocation = { pathname: '/admin/individuals', search: '?speciesId=leo&fiscalYear=2025', state: null };
+    view.rerender(
+      <IndividualSelectionProvider>
+        <IndividualListScreen />
+      </IndividualSelectionProvider>
+    );
+
     expect(screen.getByRole('checkbox', { name: 'A1を選択' })).not.toBeChecked();
     expect(screen.getByRole('button', { name: 'CSV出力（0件）' })).toBeDisabled();
   });

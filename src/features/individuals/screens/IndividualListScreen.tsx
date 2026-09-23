@@ -11,6 +11,7 @@ import {
 import { formatGenderCategory } from '../../../utils/genderCategory';
 import { useSpeciesQuery } from '../../species/hooks/useSpeciesQuery';
 import { IndividualThumbnailCell } from '../components/IndividualThumbnailCell';
+import { useIndividualSelection } from '../context/IndividualSelectionContext';
 import { useIndividualSearchQuery } from '../hooks/useIndividualQueries';
 import { getIndividualMorphDisplay } from '../utils/getIndividualMorphDisplay';
 import { downloadIndividualCsv } from '../utils/individualCsv';
@@ -65,7 +66,7 @@ export const IndividualListScreen = () => {
   const requestedDetailOpen = parseBooleanFlagParam(searchParams.get('detail'));
   const [draftMorph, setDraftMorph] = useState(appliedMorph);
   const [successMessage] = useState(() => getSuccessMessage(location.state));
-  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
+  const { selectedKeys, setSelectedKeys, setSelectionScope } = useIndividualSelection();
   const [exportError, setExportError] = useState('');
   const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +76,7 @@ export const IndividualListScreen = () => {
   const matchedSpeciesId = speciesList.find((species) => species.species_id === requestedSpeciesId)?.species_id;
   const effectiveSpeciesId = matchedSpeciesId || requestedSpeciesId || defaultSpeciesId || DEFAULT_SPECIES_ID;
   const isDetailSearchOpen = requestedDetailOpen || appliedMorph.length > 0;
+  const selectionScope = `${effectiveSpeciesId}\u0000${requestedFiscalYear}\u0000${appliedMorph}`;
 
   const individualsQuery = useIndividualSearchQuery({
     speciesId: effectiveSpeciesId,
@@ -99,9 +101,21 @@ export const IndividualListScreen = () => {
   }, [appliedMorph]);
 
   useEffect(() => {
-    setSelectedKeys(new Set());
+    setSelectionScope(selectionScope);
     setExportError('');
-  }, [effectiveSpeciesId, requestedFiscalYear, appliedMorph]);
+  }, [selectionScope, setSelectionScope]);
+
+  useEffect(() => {
+    if (!individualsQuery.data) {
+      return;
+    }
+
+    const availableKeys = new Set(individualsQuery.data.map(getIndividualKey));
+    setSelectedKeys((current) => {
+      const next = new Set([...current].filter((key) => availableKeys.has(key)));
+      return next.size === current.size ? current : next;
+    });
+  }, [individualsQuery.data, setSelectedKeys]);
 
   useEffect(() => {
     if (selectAllCheckboxRef.current) {
@@ -312,6 +326,7 @@ export const IndividualListScreen = () => {
               />
             ),
             className: adminStyles.tableSelectionCell,
+            suppressRowClick: true,
             renderCell: (individual) => {
               const key = getIndividualKey(individual);
               return (

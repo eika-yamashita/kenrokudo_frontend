@@ -20,6 +20,7 @@ import { PairingCreatePage } from './pages/PairingCreatePage';
 import { PairingEditorPage } from './pages/PairingEditorPage';
 import { EventListPage } from './pages/EventListPage';
 import { EventUpsertPage } from './pages/EventUpsertPage';
+import { IndividualSelectionLayout } from './features/individuals/context/IndividualSelectionContext';
 import './styles/appShell.css';
 
 function AppContent() {
@@ -64,10 +65,12 @@ function AppContent() {
             path="/admin/masters/bloodlines/edit/:species_id/:morph_id/:bloodline_id"
             element={<BloodlineUpsertPage mode="edit" />}
           />
-          <Route path="/admin/individuals" element={<IndividualListPage />} />
-          <Route path="/admin/individuals/new" element={<IndividualCreatePage />} />
-          <Route path="/admin/individuals/detail/:species_id/:id" element={<IndividualDetailPage />} />
-          <Route path="/admin/individuals/edit/:species_id/:id" element={<IndividualEditorPage />} />
+          <Route path="/admin/individuals" element={<IndividualSelectionLayout />}>
+            <Route index element={<IndividualListPage />} />
+            <Route path="new" element={<IndividualCreatePage />} />
+            <Route path="detail/:species_id/:id" element={<IndividualDetailPage />} />
+            <Route path="edit/:species_id/:id" element={<IndividualEditorPage />} />
+          </Route>
           <Route path="/admin/pairings" element={<PairingListPage />} />
           <Route path="/admin/pairings/new" element={<PairingCreatePage />} />
           <Route path="/admin/pairings/edit/:species_id/:fiscal_year/:pairing_id" element={<PairingEditorPage />} />
